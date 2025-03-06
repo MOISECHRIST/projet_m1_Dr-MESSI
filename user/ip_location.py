@@ -1,8 +1,8 @@
 import requests
 
-response = requests.get("https://ifconfig.me/ip").json()
+def get_ipaddress():
+    return requests.get("https://ifconfig.me/ip").text
 
-ip = response.text
 
 def get_location(ip_address):
     response = requests.get(f'http://ip-api.com/json/{ip_address}').json()
@@ -16,6 +16,3 @@ def get_location(ip_address):
         "lat": response.get("lat"),
     }
     return location_data
-
-
-print(get_location(ip))

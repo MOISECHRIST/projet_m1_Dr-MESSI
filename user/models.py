@@ -19,12 +19,24 @@ class Person(models.Model):
     profile_image = models.ImageField(upload_to="media/profile/", null=True, blank=True)
     date_of_birth = models.DateField(null=False, blank=False)
     gender = models.CharField(choices=GENDER, max_length=100, blank=False, null=False)
-    phone_number = models.CharField(blank=True)
+    phone_number = models.CharField(blank=True, null=True, max_length=150)
     longitude = models.FloatField(default=0.0)
     latitude = models.FloatField(default=0.0)
     city = models.CharField(blank=True, null = True, max_length=150)
     country = models.CharField(blank=True, null = True, max_length=150)
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        # Si l'objet est nouveau, on récupère l'IP et la localisation
+        if not self.pk:
+            ip_address = get_ip_address()
+            location_data = get_location(ip_address)
+            self.city = location_data.get("city", "")
+            self.country = location_data.get("country", "")
+            self.longitude = location_data.get("longitude", 0.0)
+            self.latitude = location_data.get("latitude", 0.0)
+
+        super().save(*args, **kwargs)
 
 
 

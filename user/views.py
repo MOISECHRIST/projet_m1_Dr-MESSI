@@ -6,15 +6,18 @@ from django.contrib.auth.models import User
 
 class MeViewSet(viewsets.ViewSet):
     #permission_classes = (IsAuthenticated,)
-    def list(self,request):
+    def list(self, request):
         user=User.objects.get(username=request.user)
-        profile = user.profile
-        profile_data=PersonSerializer(profile).data
-        return Response(profile_data)
+        user_data=UserSerializer(user).data
+        return Response(user_data)
 
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 class ServicesProvidedViewSet(viewsets.ModelViewSet):
     queryset = ServicesProvided.objects.all()

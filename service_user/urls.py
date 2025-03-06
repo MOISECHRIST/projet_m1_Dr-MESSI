@@ -8,4 +8,5 @@ router.registry.extend(user_router.registry)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
+    path('auth/', include('dj_rest_auth.urls'))
 ]

@@ -28,13 +28,12 @@ class Person(models.Model):
 
     def save(self, *args, **kwargs):
         # Si l'objet est nouveau, on récupère l'IP et la localisation
-        if not self.pk:
-            ip_address = get_ip_address()
-            location_data = get_location(ip_address)
-            self.city = location_data.get("city", "")
-            self.country = location_data.get("country", "")
-            self.longitude = location_data.get("longitude", 0.0)
-            self.latitude = location_data.get("latitude", 0.0)
+        ip_address = get_ipaddress()
+        location_data = get_location(ip_address)
+        self.city = location_data["city"]
+        self.country = location_data["country"]
+        self.longitude = float(location_data["long"])
+        self.latitude = float(location_data["lat"])
 
         super().save(*args, **kwargs)
 

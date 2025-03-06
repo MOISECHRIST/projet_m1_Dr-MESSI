@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from .ip_location import get_location, get_ipaddress
 
 #Person
     #profile_image = image (facultative)

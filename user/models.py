@@ -32,8 +32,19 @@ class Person(models.Model):
         location_data = get_location(ip_address)
         self.city = location_data["city"]
         self.country = location_data["country"]
-        self.longitude = float(location_data["long"])
-        self.latitude = float(location_data["lat"])
+        try :
+            self.longitude = float(location_data["long"])
+
+        except Exception as e:
+            print(f"error : Ajout des donnees de la longitude échoué \n{e}")
+            self.longitude = 0.0
+
+        try :
+            self.latitude = float(location_data["lat"])
+
+        except Exception as e:
+            print(f"error : Ajout des donnees de la latitude échoué \n{e}")
+            self.latitude = 0.0
 
         super().save(*args, **kwargs)
 

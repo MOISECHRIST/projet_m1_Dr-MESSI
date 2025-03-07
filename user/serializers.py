@@ -42,6 +42,8 @@ class WorkerSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
+    profile = PersonSerializer(source='person')
+
     class Meta:
         model=User
-        fields = ("id","username","first_name","last_name","email")
+        fields = ("id","username","first_name","last_name","email", "profile")

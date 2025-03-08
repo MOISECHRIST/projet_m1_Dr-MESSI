@@ -1,5 +1,6 @@
 import pika
 from decouple import config
+import json
 
 RABBITMQ_HOST = config("RABBITMQ_HOST")
 RABBITMQ_PORT = config("RABBITMQ_PORT")
@@ -39,10 +40,12 @@ class RabbitMQ_User_Producer:
 
 
     def publish(self, message, routing_key):
+        #print(f"routing key : {routing_key}")
+        #print(f"RabbiMQ data received : \n{message}")
         self.channel.basic_publish(
             exchange="user_events",
             routing_key=routing_key,
-            body=message,
+            body=json.dumps(message),
             properties=pika.BasicProperties(
                 delivery_mode=2
             )

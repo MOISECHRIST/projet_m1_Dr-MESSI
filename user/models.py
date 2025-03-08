@@ -96,5 +96,5 @@ class Worker(Person):
     headline = models.TextField(null=False, blank=True)
     about_worker = models.TextField(blank=True, null=True)
     cover_image = models.ImageField(upload_to="media/cover_image/", null=True, blank=True)
-    services = models.ManyToManyField(ServicesProvided)
-    experiences = models.ManyToManyField(Experience)
+    services = models.ManyToManyField(ServicesProvided, blank=True)
+    experiences = models.ManyToManyField(Experience, blank=True)

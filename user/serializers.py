@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import *
 from django.contrib.auth.models import User
 
+
 class PersonSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -42,8 +43,6 @@ class WorkerSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-    profile = PersonSerializer(source='person')
-
     class Meta:
         model=User
-        fields = ("id","username","first_name","last_name","email", "profile")
+        fields = ("id","username","first_name","last_name","email")

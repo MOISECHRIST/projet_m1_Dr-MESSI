@@ -53,6 +53,7 @@ class UserService{
     }
 
     public function getUser($userId){
+       
         $cachedUser = Redis::get('user:'. $userId);
 
         if($cachedUser){

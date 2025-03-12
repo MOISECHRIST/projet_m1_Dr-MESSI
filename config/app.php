@@ -5,6 +5,8 @@ use Illuminate\Support\ServiceProvider;
 
 return [
 
+
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -184,5 +186,10 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
+
+
+    'jwt' => [
+        'secret' => env('JWT_SECRET', 'default_jwt_secret_key'),
+    ],
 
 ];

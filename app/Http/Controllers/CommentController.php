@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\CommentService;
 use Illuminate\Http\Request;
+use OpenApi\Annotations as OA;
+
 
 class CommentController extends Controller
 {
@@ -14,11 +16,32 @@ class CommentController extends Controller
         $this->commentService = $commentService;
     }
 
+
+
     /**
-     * Crée un nouveau commentaire.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/comments",
+     *     summary="Créer un nouveau commentaire",
+     *     tags={"Comments"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"user_id", "publication_id", "content"},
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="publication_id", type="integer", example=1),
+     *             @OA\Property(property="content", type="string", example="Ceci est un commentaire.")
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Commentaire créé avec succès",
+     *         @OA\JsonContent(ref="#/components/schemas/Comment")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Erreur de validation"
+     *     ),
+     * )
      */
     public function store(Request $request)
     {
@@ -44,10 +67,26 @@ class CommentController extends Controller
     }
 
     /**
-     * Récupère un commentaire par son ID.
-     *
-     * @param int $commentId ID du commentaire
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/comments/{commentId}",
+     *     summary="Récupérer un commentaire par son ID",
+     *     tags={"Comments"},
+     *     @OA\Parameter(
+     *         name="commentId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détails du commentaire",
+     *         @OA\JsonContent(ref="#/components/schemas/Comment")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Commentaire non trouvé"
+     *     ),
+     * )
      */
     public function show($commentId)
     {
@@ -60,11 +99,33 @@ class CommentController extends Controller
     }
 
     /**
-     * Met à jour un commentaire existant.
-     *
-     * @param Request $request
-     * @param int $commentId ID du commentaire à mettre à jour
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Put(
+     *     path="/comments/{commentId}",
+     *     summary="Mettre à jour un commentaire",
+     *     tags={"Comments"},
+     *     @OA\Parameter(
+     *         name="commentId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"content"},
+     *             @OA\Property(property="content", type="string", example="Ceci est un commentaire mis à jour."),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Commentaire mis à jour avec succès",
+     *         @OA\JsonContent(ref="#/components/schemas/Comment")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Erreur de validation"
+     *     ),
+     * )
      */
     public function update(Request $request, $commentId)
     {
@@ -83,10 +144,25 @@ class CommentController extends Controller
     }
 
     /**
-     * Supprime un commentaire.
-     *
-     * @param int $commentId ID du commentaire à supprimer
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Delete(
+     *     path="/comments/{commentId}",
+     *     summary="Supprimer un commentaire",
+     *     tags={"Comments"},
+     *     @OA\Parameter(
+     *         name="commentId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Commentaire supprimé avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Erreur lors de la suppression"
+     *     ),
+     * )
      */
     public function destroy($commentId)
     {
@@ -99,10 +175,29 @@ class CommentController extends Controller
     }
 
     /**
-     * Récupère tous les commentaires d'une publication.
-     *
-     * @param int $publicationId ID de la publication
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/publications/{publicationId}/comments",
+     *     summary="Récupérer tous les commentaires d'une publication",
+     *     tags={"Comments"},
+     *     @OA\Parameter(
+     *         name="publicationId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des commentaires",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Comment")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Publication non trouvée"
+     *     ),
+     * )
      */
     public function getCommentsByPublication($publicationId)
     {
@@ -115,10 +210,29 @@ class CommentController extends Controller
     }
 
     /**
-     * Récupère tous les commentaires d'un utilisateur.
-     *
-     * @param int $userId ID de l'utilisateur
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/users/{userId}/comments",
+     *     summary="Récupérer tous les commentaires d'un utilisateur",
+     *     tags={"Comments"},
+     *     @OA\Parameter(
+     *         name="userId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des commentaires",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Comment")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Utilisateur non trouvé"
+     *     ),
+     * )
      */
     public function getCommentsByUser($userId)
     {

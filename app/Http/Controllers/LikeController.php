@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\LikeService;
 use Illuminate\Http\Request;
+use OpenApi\Annotations as OA;
+
 
 class LikeController extends Controller
 {
@@ -15,22 +17,39 @@ class LikeController extends Controller
     }
 
     /**
-     * Ajoute un "like" à une publication.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/likes",
+     *     summary="Ajouter un like",
+     *     tags={"Likes"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"user_id", "publication_id", "rate"},
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="publication_id", type="integer", example=1),
+     *             @OA\Property(property="rate", type="integer", example=4),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Like ajouté avec succès",
+     *         @OA\JsonContent(ref="#/components/schemas/Like")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Erreur de validation"
+     *     ),
+     * )
      */
     public function addLike(Request $request)
     {
-        // Validation des données de la requête
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'publication_id' => 'required|exists:publications,id',
-            'rate' => 'required|integer|between:1,5', // Note entre 1 et 5
+            'rate' => 'required|integer|between:1,5',
         ]);
 
         try {
-            // Ajout du like
             $like = $this->likeService->addLike(
                 $request->input('user_id'),
                 $request->input('publication_id'),
@@ -44,21 +63,40 @@ class LikeController extends Controller
     }
 
     /**
-     * Supprime un "like" d'une publication.
-     *
-     * @param int $likeId ID du like à supprimer
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Delete(
+     *     path="/likes/{likeId}",
+     *     summary="Supprimer un like",
+     *     tags={"Likes"},
+     *     @OA\Parameter(
+     *         name="likeId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"user_id"},
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Like supprimé avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Erreur lors de la suppression"
+     *     ),
+     * )
      */
     public function removeLike($likeId, Request $request)
     {
-        // Validation des données de la requête
         $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
 
         try {
-            // Suppression du like
             $this->likeService->removeLike($likeId, $request->input('user_id'));
             return response()->json(['message' => 'Like supprimé avec succès']);
         } catch (\Exception $e) {
@@ -67,10 +105,29 @@ class LikeController extends Controller
     }
 
     /**
-     * Récupère tous les "likes" d'une publication.
-     *
-     * @param int $publicationId ID de la publication
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/publications/{publicationId}/likes",
+     *     summary="Récupérer les likes d'une publication",
+     *     tags={"Likes"},
+     *     @OA\Parameter(
+     *         name="publicationId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des likes",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Like")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Publication non trouvée"
+     *     ),
+     * )
      */
     public function getLikesByPublication($publicationId)
     {
@@ -83,10 +140,29 @@ class LikeController extends Controller
     }
 
     /**
-     * Récupère tous les "likes" d'un utilisateur.
-     *
-     * @param int $userId ID de l'utilisateur
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/users/{userId}/likes",
+     *     summary="Récupérer les likes d'un utilisateur",
+     *     tags={"Likes"},
+     *     @OA\Parameter(
+     *         name="userId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des likes",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Like")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Utilisateur non trouvé"
+     *     ),
+     * )
      */
     public function getLikesByUser($userId)
     {
@@ -99,21 +175,41 @@ class LikeController extends Controller
     }
 
     /**
-     * Met à jour un "like" existant.
-     *
-     * @param Request $request
-     * @param int $likeId ID du like à mettre à jour
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Put(
+     *     path="/likes/{likeId}",
+     *     summary="Mettre à jour un like",
+     *     tags={"Likes"},
+     *     @OA\Parameter(
+     *         name="likeId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"rate"},
+     *             @OA\Property(property="rate", type="integer", example=5),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Like mis à jour avec succès",
+     *         @OA\JsonContent(ref="#/components/schemas/Like")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Erreur lors de la mise à jour"
+     *     ),
+     * )
      */
     public function updateLike(Request $request, $likeId)
     {
-        // Validation des données de la requête
         $request->validate([
-            'rate' => 'required|integer|between:1,5', // Note entre 1 et 5
+            'rate' => 'required|integer|between:1,5',
         ]);
 
         try {
-            // Mise à jour du like
             $like = $this->likeService->updateLike($likeId, $request->input('rate'));
             return response()->json($like);
         } catch (\Exception $e) {
@@ -122,10 +218,26 @@ class LikeController extends Controller
     }
 
     /**
-     * Récupère un "like" spécifique par son ID.
-     *
-     * @param int $likeId ID du like
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/likes/{likeId}",
+     *     summary="Récupérer un like par son ID",
+     *     tags={"Likes"},
+     *     @OA\Parameter(
+     *         name="likeId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détails du like",
+     *         @OA\JsonContent(ref="#/components/schemas/Like")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Like non trouvé"
+     *     ),
+     * )
      */
     public function getLikeById($likeId)
     {
@@ -138,10 +250,28 @@ class LikeController extends Controller
     }
 
     /**
-     * Calcule la moyenne des notes (rate) pour une publication donnée.
-     *
-     * @param int $publicationId ID de la publication
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/publications/{publicationId}/average-rate",
+     *     summary="Récupérer la moyenne des notes d'une publication",
+     *     tags={"Likes"},
+     *     @OA\Parameter(
+     *         name="publicationId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Moyenne des notes",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="average_rate", type="number", example=4.5)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Aucun like trouvé pour cette publication"
+     *     ),
+     * )
      */
     public function getAverageRateForPublication($publicationId)
     {

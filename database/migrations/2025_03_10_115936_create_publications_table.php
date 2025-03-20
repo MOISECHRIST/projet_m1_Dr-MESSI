@@ -15,18 +15,16 @@ return new class extends Migration
 
 
         Schema::create('publications', function (Blueprint $table) {
-            $table->id(); 
-            $table->unsignedBigInteger('author_id');
-            $table->string('title'); 
+            $table->id();
+            $table->string('title');
             $table->text('description');
             $table->timestamps();
-            $table->enum('type', ['Video', 'TextImage']);
-            $table->json('image_urls')->nullable(); 
-            $table->string('video_url')->nullable(); 
-            $table->string('textContent')->nullable(); 
+            $table->enum('type', ['Video', 'TextImages']);
+            $table->string('video_url')->nullable();
+            $table->string('textContent')->nullable();
             $table->Integer('nbr_view')->nullable();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+
         });
     }
 
@@ -34,7 +32,7 @@ return new class extends Migration
      * Reverse the migrations.
      */
     public function down(): void
-    {   
+    {
         Schema::dropIfExists('publications');
     }
 };

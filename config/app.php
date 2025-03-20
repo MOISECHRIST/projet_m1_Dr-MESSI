@@ -173,6 +173,7 @@ return [
         App\Providers\PublicationServiceProvider::class,
         App\Providers\CommentServiceProvider::class,
         App\Providers\LikeServiceProvider::class,
+        L5Swagger\L5SwaggerServiceProvider::class,
     ])->toArray(),
 
     /*

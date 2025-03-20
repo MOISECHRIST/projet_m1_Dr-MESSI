@@ -17,10 +17,9 @@ use App\Http\Controllers\LikeController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
+//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
 
 
 Route::post('/publications/video', [PublicationController::class, 'createVideoPublication']);
@@ -30,7 +29,7 @@ Route::get('/publications/{pubId}', [PublicationController::class, 'getPublicati
 Route::put('/publications/{pubId}', [PublicationController::class, 'updatePublication']);
 Route::delete('/publications/{pubId}', [PublicationController::class, 'deletePublication']);
 Route::get('/publications', [PublicationController::class, 'getAllPublications']);
-
+Route::get('/publications/video/{filename}', [PublicationController::class, 'streamVideo'])->name('video.stream');
 
 
 
@@ -50,3 +49,5 @@ Route::get('/users/{userId}/likes', [LikeController::class, 'getLikesByUser']);
 Route::put('/likes/{likeId}', [LikeController::class, 'updateLike']);
 Route::get('/likes/{likeId}', [LikeController::class, 'getLikeById']);
 Route::get('/publications/{publicationId}/average-rate', [LikeController::class, 'getAverageRateForPublication']);
+
+

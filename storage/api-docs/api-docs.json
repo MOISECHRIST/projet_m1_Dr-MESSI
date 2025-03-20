@@ -1,0 +1,1212 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Publication API",
+        "description": "API pour gérer les publications (texte, images et vidéos) les commentaires et les likes",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000/api",
+            "description": "Server local"
+        },
+        {
+            "url": "/"
+        }
+    ],
+    "paths": {
+        "/comments": {
+            "post": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Créer un nouveau commentaire",
+                "operationId": "a0c0613c248bc727d51299e2eb03d2e3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "publication_id",
+                                    "content"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "publication_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Ceci est un commentaire."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Commentaire créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Comment"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/comments/{commentId}": {
+            "get": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Récupérer un commentaire par son ID",
+                "operationId": "8398c5ec7573cb377989dc5d4675857e",
+                "parameters": [
+                    {
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du commentaire",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Comment"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Commentaire non trouvé"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Mettre à jour un commentaire",
+                "operationId": "ce01b2e370b2721178467c8af5766380",
+                "parameters": [
+                    {
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content"
+                                ],
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Ceci est un commentaire mis à jour."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Commentaire mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Comment"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Supprimer un commentaire",
+                "operationId": "710124e7bdbfb02f397c1939fb83c90e",
+                "parameters": [
+                    {
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Commentaire supprimé avec succès"
+                    },
+                    "400": {
+                        "description": "Erreur lors de la suppression"
+                    }
+                }
+            }
+        },
+        "/publications/{publicationId}/comments": {
+            "get": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Récupérer tous les commentaires d'une publication",
+                "operationId": "446f83b30cdb98e49a99fca6d6d91fc4",
+                "parameters": [
+                    {
+                        "name": "publicationId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des commentaires",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Comment"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Publication non trouvée"
+                    }
+                }
+            }
+        },
+        "/users/{userId}/comments": {
+            "get": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Récupérer tous les commentaires d'un utilisateur",
+                "operationId": "cd49600ba72a145c485073c1490548e7",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des commentaires",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Comment"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Utilisateur non trouvé"
+                    }
+                }
+            }
+        },
+        "/likes": {
+            "post": {
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Ajouter un like",
+                "operationId": "3709a56cfcde42dbc13291b1688744f5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "publication_id",
+                                    "rate"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "publication_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "rate": {
+                                        "type": "integer",
+                                        "example": 4
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Like ajouté avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Like"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/likes/{likeId}": {
+            "get": {
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Récupérer un like par son ID",
+                "operationId": "83ba8fcb930f010ef8435225b1f67148",
+                "parameters": [
+                    {
+                        "name": "likeId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du like",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Like"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Like non trouvé"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Mettre à jour un like",
+                "operationId": "a2ba2b5393cd13aaa799b3e571b62742",
+                "parameters": [
+                    {
+                        "name": "likeId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "rate"
+                                ],
+                                "properties": {
+                                    "rate": {
+                                        "type": "integer",
+                                        "example": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Like mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Like"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur lors de la mise à jour"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Supprimer un like",
+                "operationId": "8ee81ce17329c955099902c00ff5f1cb",
+                "parameters": [
+                    {
+                        "name": "likeId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Like supprimé avec succès"
+                    },
+                    "400": {
+                        "description": "Erreur lors de la suppression"
+                    }
+                }
+            }
+        },
+        "/publications/{publicationId}/likes": {
+            "get": {
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Récupérer les likes d'une publication",
+                "operationId": "9ceb2a6fc3ae6c2ff6a2b2de1ff4d58f",
+                "parameters": [
+                    {
+                        "name": "publicationId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des likes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Like"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Publication non trouvée"
+                    }
+                }
+            }
+        },
+        "/users/{userId}/likes": {
+            "get": {
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Récupérer les likes d'un utilisateur",
+                "operationId": "7d5211bee57f421eced93ee8ca81123f",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des likes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Like"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Utilisateur non trouvé"
+                    }
+                }
+            }
+        },
+        "/publications/{publicationId}/average-rate": {
+            "get": {
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Récupérer la moyenne des notes d'une publication",
+                "operationId": "5d63a3e4bddd57ccfbf06637ebbc3722",
+                "parameters": [
+                    {
+                        "name": "publicationId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Moyenne des notes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "average_rate": {
+                                            "type": "number",
+                                            "example": 4.5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Aucun like trouvé pour cette publication"
+                    }
+                }
+            }
+        },
+        "/publications/video": {
+            "post": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Créer une publication de type vidéo",
+                "operationId": "d0560891198d79d2bf7f38de892adcce",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "video_file",
+                                    "title"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "description": "ID de l'utilisateur qui cree la publication",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "video_file": {
+                                        "description": "Fichier a uploader",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Titre de la publication"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Description de la publication"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Publication vidéo créée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Publication"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/publications/text-with-images": {
+            "post": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Créer une publication de type texte avec images",
+                "description": "Crée une publication contenant du texte et une ou plusieurs images. Les images doivent être au format JPEG, PNG, JPG ou GIF, avec une taille maximale de 2 Mo par image.",
+                "operationId": "cbba4a9e3dfb5ceca1757810b40db5d3",
+                "requestBody": {
+                    "description": "Données nécessaires pour créer une publication texte + images",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "content",
+                                    "images",
+                                    "title"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "description": "ID de l'utilisateur créant la publication",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "content": {
+                                        "description": "Contenu principal de la publication",
+                                        "type": "string",
+                                        "example": "Contenu textuel de la publication"
+                                    },
+                                    "images": {
+                                        "description": "Liste des images à associer à la publication",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "title": {
+                                        "description": "Titre de la publication",
+                                        "type": "string",
+                                        "example": "Titre de la publication"
+                                    },
+                                    "description": {
+                                        "description": "Description optionnelle de la publication",
+                                        "type": "string",
+                                        "example": "Description de la publication"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Publication texte + images créée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Publication créée avec succès"
+                                        },
+                                        "publication": {
+                                            "$ref": "#/components/schemas/Publication"
+                                        },
+                                        "images": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PublicationImage"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation ou autre erreur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Une erreur s'est produite lors de la création de la publication."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur interne",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Erreur serveur interne"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/publications/author/{authorId}": {
+            "get": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Récupérer toutes les publications d'un auteur",
+                "operationId": "4f86d10ff5e842130be2a146e7f9a81a",
+                "parameters": [
+                    {
+                        "name": "authorId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des publications de l'auteur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Publication"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Auteur non trouvé"
+                    }
+                }
+            }
+        },
+        "/publications/{pubId}": {
+            "get": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Récupérer une publication par son ID",
+                "operationId": "111c9e6c79b77fc59b242f8126800a71",
+                "parameters": [
+                    {
+                        "name": "pubId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails de la publication",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Publication"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Publication non trouvée"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Supprimer une publication",
+                "operationId": "a32971ee1e85c3b8570f202cd19b2227",
+                "parameters": [
+                    {
+                        "name": "pubId",
+                        "in": "path",
+                        "description": "ID de la publication à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "description": "ID de l'utilisateur qui demande la suppression",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Publication supprimée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Publication supprimée avec succès."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur lors de la suppression",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Message d'erreur"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé (l'utilisateur n'est pas l'auteur de la publication)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Vous n'êtes pas autorisé à supprimer cette publication."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Publication non trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Publication non trouvée."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/publications": {
+            "get": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Récupérer toutes les publications",
+                "operationId": "5198364499a77a77f94be76b2ec7fc9e",
+                "responses": {
+                    "200": {
+                        "description": "Liste des publications",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Publications récupérées avec succès."
+                                        },
+                                        "publications": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Publication"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
+                    }
+                }
+            }
+        },
+        "/publications/video/{filename}": {
+            "get": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Streamer une vidéo",
+                "operationId": "fa24eab81d4e34daa053fe11c76213ba",
+                "parameters": [
+                    {
+                        "name": "filename",
+                        "in": "path",
+                        "description": "Nom du fichier vidéo",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Vidéo streamée avec succès",
+                        "content": {
+                            "video/mp4": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Vidéo non trouvée"
+                    }
+                }
+            }
+        },
+        "/publications/{id}": {
+            "put": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Mettre à jour une publication",
+                "operationId": "8bd57bc10dca4a3fa6fc17bcc092e053",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la publication à mettre à jour",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "description": "Titre de la publication",
+                                        "type": "string",
+                                        "example": "Nouveau titre"
+                                    },
+                                    "description": {
+                                        "description": "Description de la publication",
+                                        "type": "string",
+                                        "example": "Nouvelle description"
+                                    },
+                                    "video": {
+                                        "description": "Fichier vidéo à uploader (uniquement pour les publications vidéo)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "images": {
+                                        "description": "Fichiers images à uploader (uniquement pour les publications texte/images)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Publication mise à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Publication mise à jour avec succès."
+                                        },
+                                        "publication": {
+                                            "$ref": "#/components/schemas/Publication"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation ou type de publication non supporté"
+                    },
+                    "404": {
+                        "description": "Publication non trouvée"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Comment": {
+                "description": "Représente un commentaire",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "content": {
+                        "type": "string",
+                        "example": "Ceci est un commentaire"
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "publication_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-10-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-10-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Like": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "publication_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "rate": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Publication": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "video"
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Titre de la publication"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Description de la publication"
+                    },
+                    "video_url": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/video.mp4"
+                    },
+                    "content": {
+                        "type": "string",
+                        "example": "Contenu textuel de la publication"
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "url"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "PublicationImage": {
+                "description": "Représente une image associée à une publication",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "publication_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "image_path": {
+                        "type": "string",
+                        "example": "public/publications/images/abc123.jpg"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-10-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-10-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Comments",
+            "description": "Comments"
+        },
+        {
+            "name": "Likes",
+            "description": "Likes"
+        },
+        {
+            "name": "Publications",
+            "description": "Publications"
+        }
+    ]
+}

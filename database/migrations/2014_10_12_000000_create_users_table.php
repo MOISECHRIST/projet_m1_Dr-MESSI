@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); 
+            $table->string('name');
             $table->string('email')->unique();
-            $table->enum('role', [''])->default('client');
+            $table->enum('role', ['worker', 'client'])->default('client');
             $table->string('external_id')->nullable();
             $table->string('status')->default('disconnected');
             $table->timestamp('last_activity_at')->nullable();

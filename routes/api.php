@@ -26,11 +26,10 @@ Route::post('/publications/video', [PublicationController::class, 'createVideoPu
 Route::post('/publications/text-with-images', [PublicationController::class, 'createTextWithImagesPublication']);
 Route::get('/publications/author/{authorId}', [PublicationController::class, 'getPublicationsByAuthor']);
 Route::get('/publications/{pubId}', [PublicationController::class, 'getPublicationById']);
-Route::put('/publications/{pubId}', [PublicationController::class, 'updatePublication']);
+Route::post('/publications/{pubId}', [PublicationController::class, 'updatePublication']);
 Route::delete('/publications/{pubId}', [PublicationController::class, 'deletePublication']);
 Route::get('/publications', [PublicationController::class, 'getAllPublications']);
 Route::get('/publications/video/{filename}', [PublicationController::class, 'streamVideo'])->name('video.stream');
-
 
 
 Route::post('/comments', [CommentController::class, 'store']);

@@ -639,7 +639,6 @@
                                         "example": "Contenu textuel de la publication"
                                     },
                                     "images": {
-                                        "description": "Liste des images à associer à la publication",
                                         "type": "array",
                                         "items": {
                                             "type": "string",
@@ -971,12 +970,12 @@
             }
         },
         "/publications/{id}": {
-            "put": {
+            "post": {
                 "tags": [
                     "Publications"
                 ],
                 "summary": "Mettre à jour une publication",
-                "operationId": "8bd57bc10dca4a3fa6fc17bcc092e053",
+                "operationId": "ff06235b62a99b6f444abf8bbd17b807",
                 "parameters": [
                     {
                         "name": "id",

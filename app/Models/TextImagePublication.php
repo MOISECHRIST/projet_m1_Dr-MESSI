@@ -31,7 +31,5 @@ class TextImagePublication extends Publication{
         return $value;
     }
 
-    public function images(){
-        return $this->hasMany(PublicationImage::class);
-    }
+    
 }

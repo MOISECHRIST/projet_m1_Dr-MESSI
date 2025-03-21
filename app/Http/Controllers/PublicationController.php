@@ -97,6 +97,8 @@ class PublicationController extends Controller{
             $file = $request->file('video_file');
             $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
             $filePath = $file->storeAs('/publications/videos', $fileName, 'public');
+            Log::info("Video fileName".$fileName);
+            Log::info("Video filePath".$filePath);
         }
 //            $filePath = 'b.mp4';
         try {
@@ -117,105 +119,174 @@ class PublicationController extends Controller{
 
 
     /**
-     * @OA\Post(
-     *     path="/publications/text-with-images",
-     *     summary="Créer une publication de type texte avec images",
-     *     description="Crée une publication contenant du texte et une ou plusieurs images. Les images doivent être au format JPEG, PNG, JPG ou GIF, avec une taille maximale de 2 Mo par image.",
-     *     tags={"Publications"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         description="Données nécessaires pour créer une publication texte + images",
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 required={"user_id", "content", "images", "title"},
-     *                 @OA\Property(property="user_id", type="integer", example=1, description="ID de l'utilisateur créant la publication"),
-     *                 @OA\Property(property="content", type="string", example="Contenu textuel de la publication", description="Contenu principal de la publication"),
-     *                 @OA\Property(property="images", type="array", @OA\Items(type="string", format="binary"), description="Liste des images à associer à la publication"),
-     *                 @OA\Property(property="title", type="string", example="Titre de la publication", description="Titre de la publication"),
-     *                 @OA\Property(property="description", type="string", example="Description de la publication", description="Description optionnelle de la publication"),
-     *             ),
-     *         ),
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Publication texte + images créée avec succès",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="Publication créée avec succès"),
-     *             @OA\Property(property="publication", ref="#/components/schemas/Publication"),
-     *             @OA\Property(property="images", type="array", @OA\Items(ref="#/components/schemas/PublicationImage")),
-     *         ),
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Erreur de validation ou autre erreur",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error", type="string", example="Une erreur s'est produite lors de la création de la publication."),
-     *         ),
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Erreur serveur interne",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error", type="string", example="Erreur serveur interne"),
-     *         ),
-     *     ),
-     * )
-     */
+ * @OA\Post(
+ *     path="/publications/text-with-images",
+ *     summary="Créer une publication de type texte avec images",
+ *     description="Crée une publication contenant du texte et une ou plusieurs images. Les images doivent être au format JPEG, PNG, JPG ou GIF, avec une taille maximale de 2 Mo par image.",
+ *     tags={"Publications"},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         description="Données nécessaires pour créer une publication texte + images",
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 required={"user_id", "content", "images", "title"},
+ *                 @OA\Property(property="user_id", type="integer", example=1, description="ID de l'utilisateur créant la publication"),
+ *                 @OA\Property(property="content", type="string", example="Contenu textuel de la publication", description="Contenu principal de la publication"),
+ * @OA\Property(
+ *                     property="images",
+ *                     type="array",
+ *                     @OA\Items(type="string", format="binary"), 
+ *                 ),
+ *                 @OA\Property(property="title", type="string", example="Titre de la publication", description="Titre de la publication"),
+ *                 @OA\Property(property="description", type="string", example="Description de la publication", description="Description optionnelle de la publication"),
+ *             ),
+ *         ),
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Publication texte + images créée avec succès",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Publication créée avec succès"),
+ *             @OA\Property(property="publication", ref="#/components/schemas/Publication"),
+ *             @OA\Property(property="images", type="array", @OA\Items(ref="#/components/schemas/PublicationImage")),
+ *         ),
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Erreur de validation ou autre erreur",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="error", type="string", example="Une erreur s'est produite lors de la création de la publication."),
+ *         ),
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Erreur serveur interne",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="error", type="string", example="Erreur serveur interne"),
+ *         ),
+ *     ),
+ * )
+ */
     public function createTextWithImagesPublication(Request $request)
-    {
-        Log::info('Request data:', $request->all());
-        Log::info('Request files:', $request->file());
-        // Validation des données de la requête
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
-            'content' => 'required|string',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max par image
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
+{
+    // Log des données de la requête
+    Log::info('Request data:', $request->all());
+    Log::info('Request files:', $request->file());
+    
+    // Convertir les fichiers en tableau si nécessaire
+    $images = $request->file('images');
+    if (!is_array($images)) {
+        $images = [$images]; // Convertir en tableau si ce n'est pas déjà un tableau
+    }
+    Log::info('Post Request files:', $images);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->first()], 400);
-        }
+    // Validation des données de la requête
+    $validator = Validator::make($request->all(), [
+        'user_id' => 'required|exists:users,id',
+        'content' => 'required|string',
+        'images' => 'required|array', // Vérifie que 'images' est un tableau
+        'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max par image
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+    ]);
 
-        try {
-            // Création de la publication texte + images
-            $publication = $this->publicationService->createTextWithImagesPublication(
-                $request->input('user_id'),
-                $request->input('content'),
-                $request->input('title'),
-                $request->input('description')
-            );
+    if ($validator->fails()) {
+        return response()->json(['error' => $validator->errors()->first()], 400);
+    }
 
-        Log::info("Pretraitement des images");
+
+    try {
+        // Création de la publication texte + images
+        $publication = $this->publicationService->createTextWithImagesPublication(
+            $request->input('user_id'),
+            $request->input('content'),
+            $request->input('title'),
+            $request->input('description')
+        );
+
         // Traiter chaque image
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
+            foreach ($images as $image) {
+                // Générer un nom de fichier unique
                 $fileName = Str::uuid() . '.' . $image->getClientOriginalExtension();
-                $filePath = $image->storeAs('/publications/images', $fileName, 'public');
-                Log::info("Traitement des images");
-                // Enregistrer l'image dans la table post_images
+
+                // Stocker l'image dans le dossier 'publications/images'
+                $filePath = $image->storeAs('publications/images', $fileName, 'public');
+
+                // Enregistrer l'image dans la table publication_images
                 PublicationImage::create([
                     'publication_id' => $publication->id,
                     'image_path' => $filePath,
                 ]);
-
-                Log::info("Post traitement des images");
             }
         }
 
 
-            return response()->json(['message'=>'Publication cree avec succes',
-                                    'publication'=>$publication,
-                                    'images' => $publication->images], 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
-        }
+        return response()->json([
+            'message' => 'Publication créée avec succès',
+            'publication' => $publication,
+            'images' => $publication->images,
+        ], 201);
+    } catch (\Exception $e) {
+        Log::error('Erreur lors de la création de la publication : ' . $e->getMessage());
+        return response()->json(['error' => 'Une erreur s\'est produite lors de la création de la publication.'], 500);
     }
+}
+    // public function createTextWithImagesPublication(Request $request)
+    // {
+    //     Log::info('Request data:', $request->all());
+    //     Log::info('Request files:', $request->file());
+    //     // Validation des données de la requête
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|exists:users,id',
+    //         'content' => 'required|string',
+    //         'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max par image
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'nullable|string',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => $validator->errors()->first()], 400);
+    //     }
+
+    //     try {
+    //         // Création de la publication texte + images
+    //         $publication = $this->publicationService->createTextWithImagesPublication(
+    //             $request->input('user_id'),
+    //             $request->input('content'),
+    //             $request->input('title'),
+    //             $request->input('description')
+    //         );
+
+    //     Log::info("Pretraitement des images");
+    //     // Traiter chaque image
+    //     if ($request->hasFile('images')) {
+    //         foreach ($request->file('images') as $image) {
+    //             $fileName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+    //             $filePath = $image->storeAs('/publications/images', $fileName, 'public');
+    //             Log::info("Traitement des images");
+    //             // Enregistrer l'image dans la table post_images
+    //             PublicationImage::create([
+    //                 'publication_id' => $publication->id,
+    //                 'image_path' => $filePath,
+    //             ]);
+
+    //             Log::info("Post traitement des images");
+    //         }
+    //     }
+
+
+    //         return response()->json(['message'=>'Publication cree avec succes',
+    //                                 'publication'=>$publication,
+    //                                 'images' => $publication->images], 201);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 400);
+    //     }
+    // }
 
     /**
      * @OA\Get(
@@ -247,9 +318,8 @@ class PublicationController extends Controller{
         try {
             $publications = $this->publicationService->getPublicationsByAuthor($authorId);
 
-            $publications->transform(
-                function($publication) {
-                    return $this->publicationService->generateStreamUrl($publication);
+            $publications = $publications->map(function($publication) {
+                    return $this->publicationService->generateStreamUrl((object)$publication);
             });
 
             return response()->json($publications);
@@ -283,11 +353,21 @@ class PublicationController extends Controller{
     public function getPublicationById($pubId)
     {
         try {
+            // Récupérer la publication
             $publication = $this->publicationService->getPublicationById($pubId);
-            $publication = $this->publicationService->generateStreamUrl($publication);
-            return response()->json($publication);
+            
+            // Vérifier si la publication existe
+            if (!$publication) {
+                return response()->json(['error' => 'Publication not found'], 404);
+            }
+    
+            // Générer l'URL de streaming
+            $publicationWithStreamUrl = $this->publicationService->generateStreamUrl((object)$publication);
+            
+            return response()->json($publicationWithStreamUrl, 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 404);
+            // Retourner une réponse JSON en cas d'erreur
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -409,17 +489,19 @@ class PublicationController extends Controller{
      * )
      */
     public function getAllPublications()
-    {
+    {   
+        Log::info('Fetching all publications');
         try {
-
+            
             $publications = $this->publicationService->getAllPublications();
 
-            // Ajouter l'URL de streaming pour chaque post contenant une video
-            $publications->transform(
-                function($publication) {
-                    return $this->publicationService->generateStreamUrl($publication);
-                }
-            );
+            // Log::info('Fetching all publications2', ['publications' => $publications]);
+            
+            // Add streaming URL for each post containing a video
+            $publications = $publications->map(function ($publication) {
+                Log::info('Fetching all publications3');
+                return $this->publicationService->generateStreamUrl((object)$publication);
+            });
 
 
             return response()->json(['message'=>'Publications recuperes avec succes', $publications], 200);
@@ -457,9 +539,11 @@ class PublicationController extends Controller{
      */
     public function streamVideo($filename)
     {
+        Log::info("Attempting to stream video: " . $filename);
         $path = storage_path('app/public/publications/videos/' . $filename);
-
+        Log::info("Storage". $path);
         if (!file_exists($path)) {
+            Log::error("File not found: " . $path);
             return response()->json(['message' => 'Vidéo non trouvée.'], 404);
         }
 
@@ -480,7 +564,7 @@ class PublicationController extends Controller{
 
 
     /**
-     * @OA\Put(
+     * @OA\Post(
      *     path="/publications/{id}",
      *     summary="Mettre à jour une publication",
      *     tags={"Publications"},
@@ -545,8 +629,9 @@ class PublicationController extends Controller{
      *     )
      * )
      */
-    public function update(Request $request, $id)
+    public function updatePublication(Request $request, $id)
     {
+   
         // Trouver la publication par son ID
         $publication = Publication::findOrFail($id);
 

@@ -24,19 +24,23 @@ class LikeService
         // Vérifier que l'utilisateur et la publication existent
         $user = User::findOrFail($userId);
         $publication = Publication::findOrFail($publicationId);
-
+    
         DB::beginTransaction();
-
+    
         try {
-            // Créer le like
-            $like = new Like();
-            $like->user_id = $userId;
-            $like->publication_id = $publicationId;
-            $like->rate = $rate;
-            $like->save();
-
+            // Vérifier si un like existe déjà pour cet utilisateur et cette publication
+            $like = Like::updateOrCreate(
+                [
+                    'user_id' => $userId,
+                    'publication_id' => $publicationId,
+                ],
+                [
+                    'rate' => $rate,
+                ]
+            );
+    
             DB::commit();
-
+    
             return $like;
         } catch (\Exception $e) {
             DB::rollBack();

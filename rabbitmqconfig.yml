@@ -1,0 +1,24 @@
+rabbitmq:
+  host: ${RABBITMQ_HOST:localhost}
+  port: ${RABBITMQ_PORT:5672}
+  user: ${RABBITMQ_USER:guest}
+  password: ${RABBITMQ_PASSWORD:guest}
+
+  queues:
+    user_status_updates:
+      name: user_status_updates
+      durable: true
+    user_deletion_events:
+      name: user_deletion_events
+      durable: true
+
+  exchanges:
+    user_events:
+      name: user_events
+      type: topic
+      durable: true
+
+  routing_keys:
+    user_connected: user.status.connected
+    user_disconnected: user.status.disconnected
+    user_deleted: user.deleted

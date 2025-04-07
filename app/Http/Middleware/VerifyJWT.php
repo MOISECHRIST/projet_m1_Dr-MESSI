@@ -25,6 +25,12 @@ class VerifyJWT{
      */
     public function handle(Request $request, Closure $next): Response
     {   
+
+        // Vérifier si JWT est désactivé
+        if (env('JWT_ENABLED', true) === false) {
+            return $next($request);
+        }
+
         $token = $request->bearerToken();
 
         if (!$token) {

@@ -10,50 +10,60 @@ use Illuminate\Support\Facades\Log;
 class UserService{
 
     protected int $defaultExpiration = 3600;
+    protected string $activeUsersKey = 'active_users';
 
-    public function createUser(array $data): User {
-
-        try{
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'role' => $data['role'], 
-                'external_id' => $data['user_id'], 
-                'status' => 'connected', 
-                'last_activity_at' => now()
-            ]);
-
-            $this->cacheUser($user);
-            
-            return $user;
-
-        } catch(\Exception $e){
-            Log::error('Erreur lors de la création de l\'utilisateur : ' . $e->getMessage());
-            throw $e; 
-        }
-    }
-
-
-    public function updateUser(int $userId, array $data): User
+    // Methodes pour communiquer avec le service RabbitMQ
+    public function handleUserConnection(string $userId, array $data): User
     {
-        $user = User::findOrFail($userId);
-        $user->update($data);
+        // Création ou mise à jour
+        $user = User::updateOrCreate(
+            ['external_id' => $userId],
+            [
+                'name' => $data['username'] ?? 'Nouvel Utilisateur',
+                'email' => $data['email'] ?? null,
+                'role' => $data['role'] ?? 'user',
+                'status' => 'connected',
+                'last_activity_at' => now()
+            ]
+        );
 
-        Redis::set('user:'.$userId, json_encode($user), 'EX', $this->defaultExpiration);
+        $this->cacheUser($user);
+        $this->addToActiveUsers($userId);
 
         return $user;
     }
 
-
-    public function deleteUser(int $userId): void
+    public function handleUserDisconnection(string $userId): void
     {
-        $user = User::findOrFail($userId);
-        $user->delete();
-        $this->removeUseFromCache($userId);
+        if ($user = User::where('external_id', $userId)->first()) {
+            $user->update([
+                'status' => 'disconnected',
+                'last_activity_at' => now()
+            ]);
+            
+            $this->cacheUser($user);
+            $this->removeFromActiveUsers($userId);
+        }
     }
 
+
+
+    public function deleteUser(string $userId): void
+    {
+        if ($user = User::where('external_id', $userId)->first()) {
+            $user->delete();
+            $this->removeFromActiveUsers($userId);
+            $this->removeUserFromCache($userId);
+            Log::info("Utilisateur supprimé", ['user_id' => $userId]);
+        }
+    }
+
+
+    
+    // Methodes pour obtenir les informations d'un utilisateur
+ 
     public function getUser($userId){
-       
+    
         $cachedUser = Redis::get('user:'. $userId);
 
         if($cachedUser){
@@ -69,20 +79,43 @@ class UserService{
 
     }
 
-    public function cacheUser(User $user){
-        Redis::set('user:'. $user->id, json_encode($user), 'EX', $this->defaultExpiration);
+    // Methode pour cacher les utilisateurs dans Redis
+
+    public function cacheUser(User $user): void
+    {
+        Redis::setex(
+            'user:' . $user->id,
+            $this->defaultExpiration,
+            json_encode($user->toArray(), JSON_THROW_ON_ERROR)
+        );
     }
 
-    public function removeUseFromCache($userId){
+    public function removeUserFromCache($userId){
         Redis::del('user:'.$userId);
     }
 
-    public function isUserActive($userId){
-        $user = $this->getUser($userId);
 
-        if($user && $user['status'] === 'connected' && !$user->isInactive($this->defaultExpiration)){
-            return true;
-        }
-        return false;
+    // Méthodes pour gérer les utilisateurs actifs dans Redis
+
+    public function addToActiveUsers(int $userId): void
+    {
+        Redis::sadd($this->activeUsersKey, $userId);
+        Redis::expire($this->activeUsersKey, $this->defaultExpiration);
     }
+
+    public function removeFromActiveUsers(int $userId): void
+    {
+        Redis::srem($this->activeUsersKey, $userId);
+    }
+
+    public function getActiveUsers(): array
+    {
+        return Redis::smembers($this->activeUsersKey) ?: [];
+    }
+
+    public function isUserActive(int $userId): bool
+    {
+        return (bool) Redis::sismember($this->activeUsersKey, $userId);
+    }
+
 }

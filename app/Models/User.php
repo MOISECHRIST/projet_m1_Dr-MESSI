@@ -44,13 +44,9 @@ class User extends Model
     {
         $this->update([
             'status' => 'disconnected',
-            'last_activity_at' => null,
+            // 'last_activity_at' => null,
         ]);
     }
 
-    
-    public function isInactive($timeoutMinutes = 3600)
-    {
-        return $this->last_activity_at && $this->last_activity_at->lt(now()->subMinutes($timeoutMinutes));
-    }
+
 }

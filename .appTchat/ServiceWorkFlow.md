@@ -33,8 +33,8 @@ Voici une **synthèse du fonctionnement complet** de votre plateforme, intégran
 ---
 
 #### **2. Accès aux ressources**
-1. **Requête du client** :
-   - Le client envoie une requête à votre microservice avec le **token JWT** dans l'en-tête `Authorization`.
+1. **Requête du client** : à 
+   - Le client envoie une requêtevotre microservice avec le **token JWT** dans l'en-tête `Authorization`.
 
 2. **Validation du token** :
    - Votre microservice valide le token JWT en utilisant une clé secrète partagée avec le service d'authentification.

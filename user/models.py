@@ -48,8 +48,6 @@ class Person(models.Model):
 
         super().save(*args, **kwargs)
 
-
-
 #ServicesProvided
     #service_name = str
     #service_description = text (facultative)
@@ -63,7 +61,6 @@ class ServicesProvided(models.Model):
 class PreferenceArea(models.Model):
     service = models.ForeignKey(ServicesProvided, on_delete=models.CASCADE)
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
-
 
 #Customer
     #person -> Person(...)

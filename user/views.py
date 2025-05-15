@@ -84,7 +84,8 @@ class UserViewSet(viewsets.ModelViewSet):
         user.first_name=first_name
         user.last_name=last_name
         user.email=email
-        user.set_password(password)
+        if user.check_password(password):
+            user.set_password(password)
         user.save()
         data = {"id":user.pk,
                 "username":user.username,
@@ -106,7 +107,9 @@ class UserViewSet(viewsets.ModelViewSet):
         user.first_name=first_name
         user.last_name=last_name
         user.email=email
-        user.set_password(password)
+        if user.check_password(password):
+            user.set_password(password)
+        
         user.save()
         data = {"id":user.pk,
                 "username":user.username,
@@ -142,6 +145,11 @@ class UserViewSet(viewsets.ModelViewSet):
         else :
             object.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def get_permissions(self):
+        if self.action in ['update', 'partial_update', 'destroy']:
+            return [IsAuthenticated()]
+        return []
 
 class ServicesProvidedViewSet(viewsets.ModelViewSet):
     queryset = ServicesProvided.objects.all()

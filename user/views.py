@@ -10,7 +10,6 @@ from  loguru import logger
 from django.shortcuts import get_object_or_404
 
 
-
 logger.remove()
 logger.add(f"logs_warning.log",
            level="WARNING",
@@ -27,7 +26,7 @@ class MeViewSet(viewsets.ViewSet):
             return Response({"error": "Utilisateur non authentifié"}, status=401)
 
         try:
-            user = user = get_object_or_404(User, id=request.user.pk) # Utiliser request.user.username
+            user = user = get_object_or_404(User, id=request.user.pk)
             user_data = UserSerializer(user).data
             return Response(user_data)
         except User.DoesNotExist:
@@ -50,7 +49,73 @@ class PersonViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    extra_kwargs = {
+            "password": {"write_only": True}  
+        }
+        
+    def create(self, request):
+        password = request.data.get("password")
+        username = request.data.get("username")
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        email = request.data.get("email")
+
+        user = User.objects.create(username = username, first_name=first_name, last_name=last_name,
+                                   email=email)
+        user.set_password(password)
+        user.save()
+        data = {"id":user.pk,
+                "username":user.username,
+                "first_name":user.first_name,
+                "last_name":user.last_name,
+                "email": user.email,
+                "password":user.password}
+        return Response(data)
+    
+    def update(self, request, pk):
+        user = get_object_or_404(User, id=pk)
+        password = request.data.get("password")
+        username = request.data.get("username")
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        email = request.data.get("email")
+
+        user.username = username
+        user.first_name=first_name
+        user.last_name=last_name
+        user.email=email
+        user.set_password(password)
+        user.save()
+        data = {"id":user.pk,
+                "username":user.username,
+                "first_name":user.first_name,
+                "last_name":user.last_name,
+                "email": user.email,
+                "password":user.password}
+        return Response(data)
+    
+    def partial_update(self, request, pk):
+        user = get_object_or_404(User, id=pk)
+        password = request.data.get("password")
+        username = request.data.get("username")
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        email = request.data.get("email")
+
+        user.username = username
+        user.first_name=first_name
+        user.last_name=last_name
+        user.email=email
+        user.set_password(password)
+        user.save()
+        data = {"id":user.pk,
+                "username":user.username,
+                "first_name":user.first_name,
+                "last_name":user.last_name,
+                "email": user.email,
+                "password":user.password}
+        return Response(data)
+
 
     def destroy(self, request, pk):
         object = User.objects.get(id=pk)
@@ -241,13 +306,14 @@ class WorkerViewSet(viewsets.ModelViewSet):
     def create(self, request):
         serializer = WorkerSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        
         action = "worker.create"
         producer = RabbitMQ_User_Producer()
         try:
             serializer.save()
             producer.publish(message=serializer.data, routing_key=routing_key+action)
             logger.success(f"Success publishing in {routing_key+action}")
+            
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
         finally:

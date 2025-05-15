@@ -40,8 +40,6 @@ class RabbitMQ_User_Producer:
 
 
     def publish(self, message, routing_key):
-        #print(f"routing key : {routing_key}")
-        #print(f"RabbiMQ data received : \n{message}")
         self.channel.basic_publish(
             exchange="user_events",
             routing_key=routing_key,

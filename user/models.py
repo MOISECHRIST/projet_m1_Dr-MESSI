@@ -28,22 +28,28 @@ class Person(models.Model):
 
     def save(self, *args, **kwargs):
         # Si l'objet est nouveau, on récupère l'IP et la localisation
-        ip_address = get_ipaddress()
-        location_data = get_location(ip_address)
-        self.city = location_data["city"]
-        self.country = location_data["country"]
-        try :
-            self.longitude = float(location_data["long"])
+        try:
+            ip_address = get_ipaddress()
+            location_data = get_location(ip_address)
+            self.city = location_data["city"]
+            self.country = location_data["country"]
+            try :
+                self.longitude = float(location_data["long"])
 
+            except Exception as e:
+                print(f"error : Ajout des donnees de la longitude ({location_data["long"]}) échoué \n{e}")
+                self.longitude = 0.0
+
+            try :
+                self.latitude = float(location_data["lat"])
+
+            except Exception as e:
+                print(f"error : Ajout des donnees de la latitude {location_data["lat"]} échoué \n{e}")
+                self.latitude = 0.0
         except Exception as e:
-            print(f"error : Ajout des donnees de la longitude échoué \n{e}")
+            self.city=""
+            self.country=""
             self.longitude = 0.0
-
-        try :
-            self.latitude = float(location_data["lat"])
-
-        except Exception as e:
-            print(f"error : Ajout des donnees de la latitude échoué \n{e}")
             self.latitude = 0.0
 
         super().save(*args, **kwargs)
@@ -93,5 +99,5 @@ class Worker(Person):
     headline = models.TextField(null=False, blank=True)
     about_worker = models.TextField(blank=True, null=True)
     cover_image = models.ImageField(upload_to="media/cover_image/", null=True, blank=True)
-    services = models.ManyToManyField(ServicesProvided, blank=True)
-    experiences = models.ManyToManyField(Experience, blank=True)
+    services = models.ManyToManyField(ServicesProvided, blank=True, null=True)
+    experiences = models.ManyToManyField(Experience, blank=True, null=True)

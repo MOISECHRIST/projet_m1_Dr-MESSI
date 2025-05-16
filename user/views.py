@@ -5,10 +5,9 @@ from .models import *
 from .serializers import *
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from .RabbitMQ import RabbitMQ_User_Producer
+from .producer import RabbitMQ_User_Producer
 from  loguru import logger
 from django.shortcuts import get_object_or_404
-
 
 logger.remove()
 logger.add(f"logs_warning.log",
@@ -18,6 +17,9 @@ logger.add(f"logs_warning.log",
 logger.add(sys.stderr, level="SUCCESS")
 logger.add(sys.stderr, level="WARNING")
 routing_key = "user."
+list_services = ["publication", "abonnement", "offre", "recommendation", "messagerie"]
+list_queue = ["user_publication_queue", "user_abonnement_queue", "user_offre_queue", "user_recommendation_queue", "user_messagerie_queue"]
+list_exchange = ["user_publication_events", "user_abonnement_events", "user_offre_events", "user_recommendation_events", "user_messagerie_events"]
 
 class MeViewSet(viewsets.ViewSet):
 
@@ -49,9 +51,6 @@ class PersonViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    extra_kwargs = {
-            "password": {"write_only": True}  
-        }
         
     def create(self, request):
         password = request.data.get("password")
@@ -123,7 +122,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def destroy(self, request, pk):
         object = User.objects.get(id=pk)
         action = "person.delete"
-        producer = RabbitMQ_User_Producer()
+        producer = [RabbitMQ_User_Producer(queue=queue, exchange=exchange) for queue, exchange in zip(list_queue, list_exchange)]
 
         try:
             person = Person.objects.get(user=object)
@@ -136,12 +135,14 @@ class UserViewSet(viewsets.ModelViewSet):
         if publish:
             try :
                 object.delete()
-                producer.publish(message=person.pk, routing_key=routing_key + action)
-                logger.success(f"Success publishing in {routing_key + action}")
+                for i, service in enumerate(list_services):
+                    producer[i].publish(message=pk, routing_key=routing_key + action +"_"+ service)
+                    logger.success(f"Success publishing in {routing_key + action +"_"+ service}")
             except Exception as e:
                 logger.error(f"Error publishing in {routing_key + action} : {e}")
             finally:
-                producer.close()
+                for p in producer:
+                    p.close()
         else :
             object.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -160,24 +161,29 @@ class ServicesProvidedViewSet(viewsets.ModelViewSet):
         serializer = ServicesProvidedSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        action = "servicesprovided.create"
-        producer = RabbitMQ_User_Producer()
+        action = "servicesprovided.create_recommendation"
+        queue = "user_recommendation_queue"
+        exchange = "user_recommendation_events"
+        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
         try:
             serializer.save()
             producer.publish(message=serializer.data, routing_key=routing_key+action)
-            logger.success(f"Success publishing in {routing_key+action}")
+            logger.success(f"Success publishing in {routing_key+action }")
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(serializer.data)
 
     def destroy(self, request, pk):
         object = ServicesProvided.objects.get(id=pk)
 
-        action = "servicesprovided.delete"
-        producer = RabbitMQ_User_Producer()
+        action = "servicesprovided.delete_recommendation"
+        queue = "user_recommendation_queue"
+        exchange = "user_recommendation_events"
+        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
         try:
             object.delete()
             producer.publish(message=pk, routing_key=routing_key + action)
@@ -185,7 +191,8 @@ class ServicesProvidedViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -198,8 +205,10 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         serializer = PreferenceAreaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        action = "preferencearea.create"
-        producer = RabbitMQ_User_Producer()
+        action = "preferencearea.create_recommendation"
+        queue = "user_recommendation_queue"
+        exchange = "user_recommendation_events"
+        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
         try:
             serializer.save()
             producer.publish(message=serializer.data, routing_key=routing_key+action)
@@ -207,7 +216,8 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(serializer.data)
 
@@ -216,8 +226,10 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         serializer = PreferenceAreaSerializer(instance=object, data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        action = "preferencearea.update"
-        producer = RabbitMQ_User_Producer()
+        action = "preferencearea.update_recommendation"
+        queue = "user_recommendation_queue"
+        exchange = "user_recommendation_events"
+        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
         try:
             serializer.save()
             producer.publish(message=serializer.data, routing_key=routing_key + action)
@@ -225,7 +237,8 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(serializer.data)
 
@@ -234,8 +247,10 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         serializer = PreferenceAreaSerializer(instance=object, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        action = "preferencearea.partialupdate"
-        producer = RabbitMQ_User_Producer()
+        action = "preferencearea.partialupdate_recommendation"
+        queue = "user_recommendation_queue"
+        exchange = "user_recommendation_events"
+        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
         try:
             serializer.save()
             producer.publish(message=serializer.data, routing_key=routing_key + action)
@@ -243,15 +258,18 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(serializer.data)
 
     def destroy(self, request, pk):
         object = PreferenceArea.objects.get(id=pk)
 
-        action = "preferencearea.delete"
-        producer = RabbitMQ_User_Producer()
+        action = "preferencearea.delete_recommendation"
+        queue = "user_recommendation_queue"
+        exchange = "user_recommendation_events"
+        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
         try:
             object.delete()
             producer.publish(message=pk, routing_key=routing_key + action)
@@ -259,7 +277,8 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -273,33 +292,19 @@ class CustomerViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         action = "customer.create"
-        producer = RabbitMQ_User_Producer()
+        producer = [RabbitMQ_User_Producer(queue=queue, exchange=exchange) for queue, exchange in zip(list_queue, list_exchange)]
         try:
             serializer.save()
-            producer.publish(message=serializer.data, routing_key=routing_key+action)
-            logger.success(f"Success publishing in {routing_key+action}")
+            for i, service in enumerate(list_services):
+                producer[i].publish(message=serializer.data, routing_key=routing_key+action+"_"+service)
+                logger.success(f"Success publishing in {routing_key+action +"_"+ service}")
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(serializer.data)
-
-    def destroy(self, request, pk):
-        object = Customer.objects.get(id=pk)
-
-        action = "customer.delete"
-        producer = RabbitMQ_User_Producer()
-        try:
-            object.delete()
-            producer.publish(message=pk, routing_key=routing_key + action)
-            logger.success(f"Success publishing in {routing_key + action}")
-        except Exception as e:
-            logger.error(f"Error publishing in {routing_key + action} : {e}")
-        finally:
-            producer.close()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ExperienceViewSet(viewsets.ModelViewSet):
     queryset = Experience.objects.all()
@@ -316,16 +321,18 @@ class WorkerViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         
         action = "worker.create"
-        producer = RabbitMQ_User_Producer()
+        producer = [RabbitMQ_User_Producer(queue=queue, exchange=exchange) for queue, exchange in zip(list_queue, list_exchange)]
         try:
             serializer.save()
-            producer.publish(message=serializer.data, routing_key=routing_key+action)
-            logger.success(f"Success publishing in {routing_key+action}")
+            for i, service in enumerate(list_services):
+                producer[i].publish(message=serializer.data, routing_key=routing_key+action+"_"+service)
+                logger.success(f"Success publishing in {routing_key+action +"_"+ service}")
             
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(serializer.data)
 
@@ -335,15 +342,19 @@ class WorkerViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         action = "worker.update"
-        producer = RabbitMQ_User_Producer()
+        queue = "user_recommendation_queue"
+        exchange = "user_recommendation_events"
+        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
         try:
             serializer.save()
-            producer.publish(message=serializer.data, routing_key=routing_key + action)
-            logger.success(f"Success publishing in {routing_key + action}")
+            service = "recommendation"
+            producer.publish(message=serializer.data, routing_key=routing_key + action +"_"+ service)
+            logger.success(f"Success publishing in {routing_key + action +"_"+ service}")
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(serializer.data)
 
@@ -353,31 +364,18 @@ class WorkerViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         action = "worker.partialupdate"
-        producer = RabbitMQ_User_Producer()
+        queue = "user_recommendation_queue"
+        exchange = "user_recommendation_events"
+        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
         try:
             serializer.save()
-            producer.publish(message=serializer.data, routing_key=routing_key + action)
-            logger.success(f"Success publishing in {routing_key + action}")
+            service = "recommendation"
+            producer.publish(message=serializer.data, routing_key=routing_key + action +"_"+ service)
+            logger.success(f"Success publishing in {routing_key + action +"_"+ service}")
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(serializer.data)
-
-
-    def destroy(self, request, pk):
-        object = Worker.objects.get(id=pk)
-
-        action = "worker.delete"
-        producer = RabbitMQ_User_Producer()
-        try:
-            object.delete()
-            producer.publish(message=pk, routing_key=routing_key + action)
-            logger.success(f"Success publishing in {routing_key + action}")
-        except Exception as e:
-            logger.error(f"Error publishing in {routing_key + action} : {e}")
-        finally:
-            producer.close()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)

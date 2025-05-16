@@ -2,7 +2,7 @@ import sys
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
-from .RabbitMQ import RabbitMQ_User_Producer
+from .producer import RabbitMQ_User_Producer
 from django.contrib.auth.models import User
 from  loguru import logger
 from .serializers import PersonSerializer
@@ -18,16 +18,19 @@ logger.add(sys.stderr, level="SUCCESS")
 logger.add(sys.stderr, level="WARNING")
 
 routing_key = "user."
-
+list_services = ["publication", "abonnement", "offre", "recommendation", "messagerie"]
+list_queue = ["user_publication_queue", "user_abonnement_queue", "user_offre_queue", "user_recommendation_queue", "user_messagerie_queue"]
+list_exchange = ["user_publication_events", "user_abonnement_events", "user_offre_events", "user_recommendation_events", "user_messagerie_events"]
 
 @receiver(user_logged_in)
 def handle_user_logged_in(sender, request, **kwargs):
-    action = f"user{request.user.pk}.login"
-    producer = RabbitMQ_User_Producer()
+    action = "user.login"
+    producer = [RabbitMQ_User_Producer(queue=queue, exchange=exchange) for queue, exchange in zip(list_queue, list_exchange)]
 
     if not request.user.is_authenticated:
             return Response({"error": "Utilisateur non authentifié"}, status=401)
 
+    
     try:
         user = get_object_or_404(User, id=request.user.pk)
         serializer = PersonSerializer(get_object_or_404(Person, user = user))
@@ -39,18 +42,21 @@ def handle_user_logged_in(sender, request, **kwargs):
              data['user_type']='Customer'
         else :
              data['user_type']='Worker'
-        producer.publish(message=data, routing_key=routing_key + action)
-        logger.success(f"Success publishing in {routing_key + action}")
+        
+        for i, service in enumerate(list_services):
+            producer[i].publish(message=data, routing_key=routing_key + action +"_"+ service)
+            logger.success(f"Success publishing in {routing_key + action +"_"+ service}")
         
     except Exception as e:
         logger.error(f"Error publishing in {routing_key + action} : {e}")
     
-    producer.close()
+    for p in producer:
+        p.close()
 
 @receiver(user_logged_out)
 def handle_user_logged_out(sender, request, **kwargs):
-    action = f"user{request.user.pk}.logout"
-    producer = RabbitMQ_User_Producer()
+    action = "user.logout"
+    producer = [RabbitMQ_User_Producer(queue=queue, exchange=exchange) for queue, exchange in zip(list_queue, list_exchange)]
 
     if not request.user.is_authenticated:
             return Response({"error": "Utilisateur non authentifié"}, status=401)
@@ -66,11 +72,13 @@ def handle_user_logged_out(sender, request, **kwargs):
              data['user_type']='Customer'
         else :
              data['user_type']='Worker'
-        producer.publish(message=data, routing_key=routing_key + action)
-        logger.success(f"Success publishing in {routing_key + action}")
+        for i, service in enumerate(list_services):
+            producer[i].publish(message=data, routing_key=routing_key + action +"_"+ service)
+            logger.success(f"Success publishing in {routing_key + action +"_"+ service}")
         
     except Exception as e:
         logger.error(f"Error publishing in {routing_key + action} : {e}")
     
-    producer.close()
+    for p in producer:
+        p.close()
       

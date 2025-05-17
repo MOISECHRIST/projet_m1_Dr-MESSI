@@ -9,4 +9,4 @@ router.register('publication/post',PublicationViewSet)
 router.register('publication/comment',CommentViewSet)
 router.register('publication/like',LikeViewSet)
 router.register('publication/recommender',RecommenderViewSet)
-
+router.register('publication/print_screen',Screen_PrintViewSet)

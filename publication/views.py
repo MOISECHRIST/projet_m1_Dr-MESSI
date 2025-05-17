@@ -145,7 +145,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             producer.publish(message=serializer.data, routing_key=routing_key + action + "_" + service)
             logger.success(f"Success publishing in {routing_key + action + "_" + service}")
         except Exception as e:
-            logger.error(f"Error publishing in {routing_key + action} : {e}")
+            logger.error(f"Error publishing in {routing_key + action+ "_" + service} : {e}")
         finally:
             producer.close()
 
@@ -163,7 +163,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             producer.publish(message=serializer.data, routing_key=routing_key + action + "_" + service)
             logger.success(f"Success publishing in {routing_key + action + "_" + service}")
         except Exception as e:
-            logger.error(f"Error publishing in {routing_key + action} : {e}")
+            logger.error(f"Error publishing in {routing_key + action+ "_" + service} : {e}")
         finally:
             producer.close()
 
@@ -180,7 +180,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             logger.success(f"Success publishing in {routing_key + action + "_" + service}")
 
         except Exception as e:
-            logger.error(f"Error publishing in {routing_key + action} : {e}")
+            logger.error(f"Error publishing in {routing_key + action+ "_" + service} : {e}")
         finally:
             producer.close()
 
@@ -203,7 +203,7 @@ class LikeViewSet(viewsets.ModelViewSet):
             logger.success(f"Success publishing in {routing_key + action + "_" + service}")
 
         except Exception as e:
-            logger.error(f"Error publishing in {routing_key + action} : {e}")
+            logger.error(f"Error publishing in {routing_key + action+ "_" + service} : {e}")
         finally:
             producer.close()
 
@@ -221,7 +221,7 @@ class LikeViewSet(viewsets.ModelViewSet):
             producer.publish(message=serializer.data, routing_key=routing_key + action + "_" + service)
             logger.success(f"Success publishing in {routing_key + action + "_" + service}")
         except Exception as e:
-            logger.error(f"Error publishing in {routing_key + action} : {e}")
+            logger.error(f"Error publishing in {routing_key + action+ "_" + service} : {e}")
         finally:
             producer.close()
 
@@ -239,7 +239,7 @@ class LikeViewSet(viewsets.ModelViewSet):
             producer.publish(message=serializer.data, routing_key=routing_key + action + "_" + service)
             logger.success(f"Success publishing in {routing_key + action + "_" + service}")
         except Exception as e:
-            logger.error(f"Error publishing in {routing_key + action} : {e}")
+            logger.error(f"Error publishing in {routing_key + action+ "_" + service} : {e}")
         finally:
             producer.close()
 
@@ -256,7 +256,7 @@ class LikeViewSet(viewsets.ModelViewSet):
             logger.success(f"Success publishing in {routing_key + action + "_" + service}")
 
         except Exception as e:
-            logger.error(f"Error publishing in {routing_key + action} : {e}")
+            logger.error(f"Error publishing in {routing_key + action+ "_" + service} : {e}")
         finally:
             producer.close()
 
@@ -266,3 +266,26 @@ class RecommenderViewSet(viewsets.ModelViewSet):
     queryset = Recommender.objects.all()
     serializer_class = RecommenderSerializer
     #permission_classes = [IsAuthenticated]
+
+
+class Screen_PrintViewSet(viewsets.ModelViewSet):
+    queryset = Screen_Print.objects.all()
+    serializer_class = Screen_PrintSerializer
+
+    def create(self, request):
+        serializer = Screen_PrintSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = "screen_view.create"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action + "_" + service)
+            logger.success(f"Success publishing in {routing_key + action + "_" + service}")
+
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action+ "_" + service} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)

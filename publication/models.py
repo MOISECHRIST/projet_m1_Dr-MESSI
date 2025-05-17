@@ -74,11 +74,16 @@ class Comment(models.Model):
         super().save(*args, **kwargs)
 
 class Like(models.Model):
+    LIKE_VALUE = [("Like", "Like"),
+                  ("Neutral", "Neutral"),
+                  ("Hate","Hate")]
     publication = models.ForeignKey(Publication, on_delete=models.CASCADE)
     post_at = models.DateTimeField(default=timezone.now(), null=False, blank=False)
     update_at = models.DateTimeField(null=True, blank=True)
     owner = models.ForeignKey(Person, on_delete=models.CASCADE)
     modified = models.BooleanField(default=False, null=False, blank=False)
+    like_value = models.CharField(default="Neutral", choices=LIKE_VALUE, max_length=20, blank=False, null=False)
+
 
     def save(self, *args, **kwargs):
         current_date = timezone.now()
@@ -92,7 +97,7 @@ class Like(models.Model):
 class Screen_Print(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.CASCADE)
     viewer = models.ForeignKey(Person, on_delete=models.CASCADE)
-    post_at = models.DateTimeField(default=timezone.now(), null=False, blank=False)
+    view_at = models.DateTimeField(default=timezone.now(), null=False, blank=False)
 
 
 class Recommender(models.Model):

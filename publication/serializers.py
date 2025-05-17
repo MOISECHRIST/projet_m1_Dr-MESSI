@@ -50,3 +50,9 @@ class RecommenderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recommender
         fields = '__all__'
+
+class Screen_PrintSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Screen_Print
+        fields = '__all__'

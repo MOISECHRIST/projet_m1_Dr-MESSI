@@ -79,6 +79,8 @@ class OfferApplication(models.Model):
             # Comparaison avec le nombre maximum de travailleurs
             if self.offer.number_of_worker is not None and validated_count >= self.offer.number_of_worker:
                 raise ValidationError("Le nombre maximum de travailleurs pour cette offre a déjà été atteint.")
+            elif self.offer.number_of_worker is not None and validated_count == self.offer.number_of_worker -1 :
+                self.offer.offer_status = "Close"
 
         super().save(*args, **kwargs)
 

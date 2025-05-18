@@ -22,6 +22,7 @@ RABBITMQ_PASSWORD = config("RABBITMQ_PASSWORD")
 
 DESTINATAIRE_SERVICE = "publication"
 SENDER = "user_publication"
+SENDER_SERVICE = "user"
 KEYS = [".worker.create_", ".customer.create_", ".user.login_", ".user.logout_", ".worker.delete_", ".customer.delete_"]
 def handle_worker_event(routing_key, data):
     if "create" in routing_key:
@@ -72,8 +73,8 @@ def start_consumer():
     queue_name = SENDER + "_queue"
     channel.queue_declare(queue=queue_name, durable=True)
 
-    # Bind to relevant routing keys
-    keys = [SENDER +i+ DESTINATAIRE_SERVICE for i in KEYS]
+    # Bind to relevant routing keys : user.worker.create_publication
+    keys = [SENDER_SERVICE +i+ DESTINATAIRE_SERVICE for i in KEYS]
     for key in keys:
         channel.queue_bind(exchange= SENDER + "_events", queue=queue_name, routing_key=key)
 

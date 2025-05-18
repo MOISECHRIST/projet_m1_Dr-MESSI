@@ -5,8 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="621b7214-98b9-4e4f-8e0c-7cc6b396413f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/abonnement/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/abonnement/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/abonnement/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/abonnement/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/abonnement/consumer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/abonnement/producer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,10 +42,15 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "django__subscription__service",
-    "last_opened_file_path": "/Users/macbookpro/Documents/INFO UY1/INFO M1 2024-2025/UE Projet MESSI/implementation/service abonnement",
+    "last_opened_file_path": "/Users/macbookpro/Documents/INFO UY1/INFO M1 2024-2025/UE Projet MESSI/implementation/service abonnement/abonnement",
     "settings.editor.selected.configurable": "preferences.lookFeel"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/abonnement" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

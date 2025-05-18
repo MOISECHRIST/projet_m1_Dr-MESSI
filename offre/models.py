@@ -82,6 +82,9 @@ class OfferApplication(models.Model):
             elif self.offer.number_of_worker is not None and validated_count == self.offer.number_of_worker -1 :
                 self.offer.offer_status = "Close"
 
+            if self.offer.offer_status == "Close":
+                raise ValidationError("L'offre est déjà fermé. Vous ne pouvez plus ajouter un nouveau travailleur.")
+
         super().save(*args, **kwargs)
 
 #Recommandations à gérer

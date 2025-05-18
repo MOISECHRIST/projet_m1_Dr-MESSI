@@ -17,7 +17,7 @@ logger.add(sys.stderr, level="SUCCESS")
 logger.add(sys.stderr, level="WARNING")
 
 service = "recommendation"
-routing_key = "publication."
+routing_key = "offre."
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
@@ -40,11 +40,23 @@ class MediaViewSet(viewsets.ModelViewSet):
     serializer_class = MediaSerializer
     #permission_classes = [IsAuthenticated]
 
+    # Envoyer les données au service recommendation
+    #   => create view
+    #   => delete view
+    #   => update view
+    #   => partial update view
+
 
 class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
     #permission_classes = [IsAuthenticated]
+
+    # Envoyer les données au service recommendation
+    #   => create view
+    #   => delete view
+    #   => update view
+    #   => partial update view
 
 
 class WorkOfferViewSet(viewsets.ModelViewSet):
@@ -52,8 +64,20 @@ class WorkOfferViewSet(viewsets.ModelViewSet):
     serializer_class = WorkOfferSerializer
     #permission_classes = [IsAuthenticated]
 
+    # Envoyer les données au service recommendation
+    #   => create view
+    #   => delete view
+    #   => update view
+    #   => partial update view
+
 
 class OfferApplicationViewSet(viewsets.ModelViewSet):
     queryset = OfferApplication.objects.all()
     serializer_class = OfferApplicationSerializer
+    #permission_classes = [IsAuthenticated]
+
+
+class RecommenderViewSet(viewsets.ModelViewSet):
+    queryset = Recommender.objects.all()
+    serializer_class = RecommenderSerializer
     #permission_classes = [IsAuthenticated]

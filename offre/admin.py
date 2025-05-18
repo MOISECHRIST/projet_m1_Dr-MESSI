@@ -8,4 +8,4 @@ admin.site.register(Worker)
 admin.site.register(Location)
 admin.site.register(WorkOffer)
 admin.site.register(OfferApplication)
-
+admin.site.register(Recommender)

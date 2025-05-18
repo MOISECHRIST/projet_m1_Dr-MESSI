@@ -46,3 +46,9 @@ class OfferApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfferApplication
         fields = '__all__'
+
+class RecommenderSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recommender
+        fields = '__all__'

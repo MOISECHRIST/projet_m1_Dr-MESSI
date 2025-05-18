@@ -1,7 +1,6 @@
-from tkinter.constants import CASCADE
-
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 
 # Create your models here.
@@ -56,6 +55,8 @@ class WorkOffer(models.Model):
     post_at = models.DateTimeField(default=timezone.now(), blank=False, null=False)
     expire_date = models.DateField(null=True, blank=True)
     list_of_media = models.ManyToManyField(Media, blank=True)
+    number_of_worker = models.IntegerField(null=True, blank=True)
+    work_domain = models.CharField(max_length=255, null=False, blank=False, default='unknown')
 
 class OfferApplication(models.Model):
     STATUS = [("Pending", "Pending"),
@@ -67,4 +68,22 @@ class OfferApplication(models.Model):
     attach_files = models.ManyToManyField(Media, null=True, blank=True)
     application_status = models.CharField(max_length=20, null=False, blank=False, choices=STATUS, default="Pending")
 
+    def save(self, *args, **kwargs):
+        if self.application_status == "Validated":
+            # Nombre de candidatures déjà validées pour cette offre
+            validated_count = OfferApplication.objects.filter(
+                offer=self.offer,
+                application_status="Validated"
+            ).exclude(pk=self.pk).count()
 
+            # Comparaison avec le nombre maximum de travailleurs
+            if self.offer.number_of_worker is not None and validated_count >= self.offer.number_of_worker:
+                raise ValidationError("Le nombre maximum de travailleurs pour cette offre a déjà été atteint.")
+
+        super().save(*args, **kwargs)
+
+#Recommandations à gérer
+class Recommender(models.Model):
+    offer = models.ForeignKey(WorkOffer, on_delete=models.CASCADE)
+    worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
+    predict_recommendation = models.FloatField(null=False, blank=False)

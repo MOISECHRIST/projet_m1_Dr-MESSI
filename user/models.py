@@ -1,5 +1,9 @@
+from email.policy import default
+from random import choices
+
 from django.db import models
 from django.contrib.auth.models import User
+
 from .ip_location import get_location, get_ipaddress
 
 #Person
@@ -37,14 +41,14 @@ class Person(models.Model):
                 self.longitude = float(location_data["long"])
 
             except Exception as e:
-                print(f"error : Ajout des donnees de la longitude ({location_data["long"]}) échoué \n{e}")
+                print(f"error : Ajout des donnees de la longitude ({location_data['long']}) échoué \n{e}")
                 self.longitude = 0.0
 
             try :
                 self.latitude = float(location_data["lat"])
 
             except Exception as e:
-                print(f"error : Ajout des donnees de la latitude {location_data["lat"]} échoué \n{e}")
+                print(f"error : Ajout des donnees de la latitude {location_data['lat']} échoué \n{e}")
                 self.latitude = 0.0
         except Exception as e:
             self.city=""
@@ -96,8 +100,13 @@ class Experience(models.Model):
     #services -> list(ServicesProvided)
     #experiences -> List(Experience)
 class Worker(Person):
+    STATUS = [("Unverified", "Unverified"),
+              ("Beginner", "Beginner"),
+              ("Intermediate", "Intermediate"),
+              ("Confirmed", "Confirmed")]
     headline = models.TextField(null=False, blank=True)
     about_worker = models.TextField(blank=True, null=True)
     cover_image = models.ImageField(upload_to="media/cover_image/", null=True, blank=True)
     services = models.ManyToManyField(ServicesProvided, blank=True, null=True)
     experiences = models.ManyToManyField(Experience, blank=True, null=True)
+    worker_status = models.CharField(choices = STATUS, default="Unverified", max_length = 20)

@@ -137,7 +137,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 object.delete()
                 for i, service in enumerate(list_services):
                     producer[i].publish(message=pk, routing_key=routing_key + action +"_"+ service)
-                    logger.success(f"Success publishing in {routing_key + action +"_"+ service}")
+                    logger.success(f"Success publishing in {routing_key + action + '_' + service}")
             except Exception as e:
                 logger.error(f"Error publishing in {routing_key + action} : {e}")
             finally:
@@ -172,8 +172,7 @@ class ServicesProvidedViewSet(viewsets.ModelViewSet):
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
         finally:
-            for p in producer:
-                p.close()
+            producer.close()
 
         return Response(serializer.data)
 
@@ -191,8 +190,7 @@ class ServicesProvidedViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            for p in producer:
-                p.close()
+            producer.close()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -216,8 +214,7 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
         finally:
-            for p in producer:
-                p.close()
+            producer.close()
 
         return Response(serializer.data)
 
@@ -237,8 +234,7 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            for p in producer:
-                p.close()
+            producer.close()
 
         return Response(serializer.data)
 
@@ -258,8 +254,7 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            for p in producer:
-                p.close()
+            producer.close()
 
         return Response(serializer.data)
 
@@ -277,8 +272,7 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            for p in producer:
-                p.close()
+            producer.close()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -297,7 +291,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
             serializer.save()
             for i, service in enumerate(list_services):
                 producer[i].publish(message=serializer.data, routing_key=routing_key+action+"_"+service)
-                logger.success(f"Success publishing in {routing_key+action +"_"+ service}")
+                logger.success(f"Success publishing in {routing_key+action + '_' + service}")
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
         finally:
@@ -326,7 +320,7 @@ class WorkerViewSet(viewsets.ModelViewSet):
             serializer.save()
             for i, service in enumerate(list_services):
                 producer[i].publish(message=serializer.data, routing_key=routing_key+action+"_"+service)
-                logger.success(f"Success publishing in {routing_key+action +"_"+ service}")
+                logger.success(f"Success publishing in {routing_key+action + '_' + service}")
             
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
@@ -348,13 +342,12 @@ class WorkerViewSet(viewsets.ModelViewSet):
         try:
             serializer.save()
             service = "recommendation"
-            producer.publish(message=serializer.data, routing_key=routing_key + action +"_"+ service)
-            logger.success(f"Success publishing in {routing_key + action +"_"+ service}")
+            producer.publish(message=serializer.data, routing_key=routing_key + action + '_' + service)
+            logger.success(f"Success publishing in {routing_key + action + '_' + service}")
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            for p in producer:
-                p.close()
+            producer.close()
 
         return Response(serializer.data)
 
@@ -371,11 +364,10 @@ class WorkerViewSet(viewsets.ModelViewSet):
             serializer.save()
             service = "recommendation"
             producer.publish(message=serializer.data, routing_key=routing_key + action +"_"+ service)
-            logger.success(f"Success publishing in {routing_key + action +"_"+ service}")
+            logger.success(f"Success publishing in {routing_key + action + '_' + service}")
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            for p in producer:
-                p.close()
+            producer.close()
 
         return Response(serializer.data)

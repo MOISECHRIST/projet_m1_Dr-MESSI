@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from .models import *
+from .producer import Producer
 from .serializers import *
 from rest_framework.response import Response
 from loguru import logger
@@ -16,7 +17,6 @@ logger.add(f"logs_warning.log",
 logger.add(sys.stderr, level="SUCCESS")
 logger.add(sys.stderr, level="WARNING")
 
-service = "recommendation"
 routing_key = "offre."
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
@@ -40,11 +40,74 @@ class MediaViewSet(viewsets.ModelViewSet):
     serializer_class = MediaSerializer
     #permission_classes = [IsAuthenticated]
 
-    # Envoyer les données au service recommendation
-    #   => create view
-    #   => delete view
-    #   => update view
-    #   => partial update view
+    def create(self, request):
+        serializer = MediaSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = "media.create_recommendation"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)
+
+    def update(self, request, pk):
+        object = Media.objects.get(id=pk)
+        serializer = MediaSerializer(instance=object, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = "media.update_recommendation"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)
+
+    def partial_update(self, request, pk):
+        object = Media.objects.get(id=pk)
+        serializer = MediaSerializer(instance=object, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        action = "media.partialupdate_recommendation"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)
+
+    def destroy(self, request, pk):
+        object = Media.objects.get(id=pk)
+
+        action = "media.delete_recommendation"
+        producer = Producer()
+        try:
+            object.delete()
+            producer.publish(message=pk, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class LocationViewSet(viewsets.ModelViewSet):
@@ -52,11 +115,74 @@ class LocationViewSet(viewsets.ModelViewSet):
     serializer_class = LocationSerializer
     #permission_classes = [IsAuthenticated]
 
-    # Envoyer les données au service recommendation
-    #   => create view
-    #   => delete view
-    #   => update view
-    #   => partial update view
+    def create(self, request):
+        serializer = LocationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = "location.create_recommendation"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)
+
+    def update(self, request, pk):
+        object = Location.objects.get(id=pk)
+        serializer = LocationSerializer(instance=object, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = "location.update_recommendation"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)
+
+    def partial_update(self, request, pk):
+        object = Location.objects.get(id=pk)
+        serializer = LocationSerializer(instance=object, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = "location.partialupdate_recommendation"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)
+
+    def destroy(self, request, pk):
+        object = Location.objects.get(id=pk)
+
+        action = "location.delete_recommendation"
+        producer = Producer()
+        try:
+            object.delete()
+            producer.publish(message=pk, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class WorkOfferViewSet(viewsets.ModelViewSet):
@@ -64,11 +190,74 @@ class WorkOfferViewSet(viewsets.ModelViewSet):
     serializer_class = WorkOfferSerializer
     #permission_classes = [IsAuthenticated]
 
-    # Envoyer les données au service recommendation
-    #   => create view
-    #   => delete view
-    #   => update view
-    #   => partial update view
+    def create(self, request):
+        serializer = WorkOfferSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = "workoffer.create_recommendation"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)
+
+    def update(self, request, pk):
+        object = WorkOffer.objects.get(id=pk)
+        serializer = WorkOfferSerializer(instance=object, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = "workoffer.update_recommendation"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)
+
+    def partial_update(self, request, pk):
+        object = WorkOffer.objects.get(id=pk)
+        serializer = WorkOfferSerializer(instance=object, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = "workoffer.partialupdate_recommendation"
+        producer = Producer()
+        try:
+            serializer.save()
+            producer.publish(message=serializer.data, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(serializer.data)
+
+    def destroy(self, request, pk):
+        object = WorkOffer.objects.get(id=pk)
+
+        action = "workoffer.delete_recommendation"
+        producer = Producer()
+        try:
+            object.delete()
+            producer.publish(message=pk, routing_key=routing_key + action)
+            logger.success(f"Success publishing in {routing_key + action}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action} : {e}")
+        finally:
+            producer.close()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OfferApplicationViewSet(viewsets.ModelViewSet):

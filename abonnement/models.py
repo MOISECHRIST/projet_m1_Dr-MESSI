@@ -30,7 +30,7 @@ class Worker(Person):
 class Subscription(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
-    subscribe_at = models.DateTimeField(default=timezone, null=False, blank=False)
+    subscribe_at = models.DateTimeField(default=timezone.now(), null=False, blank=False)
 
 
 class SubscriptionRecommendation(models.Model):

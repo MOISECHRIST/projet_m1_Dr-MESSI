@@ -46,7 +46,7 @@ class MeViewSet(viewsets.ViewSet):
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -155,7 +155,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class ServicesProvidedViewSet(viewsets.ModelViewSet):
     queryset = ServicesProvided.objects.all()
     serializer_class = ServicesProvidedSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def create(self, request):
         serializer = ServicesProvidedSerializer(data=request.data)
@@ -197,7 +197,7 @@ class ServicesProvidedViewSet(viewsets.ModelViewSet):
 class PreferenceAreaViewSet(viewsets.ModelViewSet):
     queryset = PreferenceArea.objects.all()
     serializer_class = PreferenceAreaSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def create(self, request):
         serializer = PreferenceAreaSerializer(data=request.data)
@@ -279,7 +279,7 @@ class PreferenceAreaViewSet(viewsets.ModelViewSet):
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def create(self, request):
         serializer = CustomerSerializer(data=request.data)
@@ -303,12 +303,12 @@ class CustomerViewSet(viewsets.ModelViewSet):
 class ExperienceViewSet(viewsets.ModelViewSet):
     queryset = Experience.objects.all()
     serializer_class = ExperienceSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
 class WorkerViewSet(viewsets.ModelViewSet):
     queryset = Worker.objects.all()
     serializer_class = WorkerSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def create(self, request):
         serializer = WorkerSerializer(data=request.data)

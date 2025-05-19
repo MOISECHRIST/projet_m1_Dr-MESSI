@@ -22,7 +22,7 @@ RABBITMQ_PASSWORD = config("RABBITMQ_PASSWORD")
 
 DESTINATAIRE_SERVICE = "abonnement"
 SENDER = "user_abonnement"
-SENDER_SERVICE = "abonnement"
+SENDER_SERVICE = "user"
 KEYS = [".worker.create_", ".customer.create_", ".user.login_", ".user.logout_", ".worker.delete_", ".customer.delete_"]
 def handle_worker_event(routing_key, data):
     if "create" in routing_key:

@@ -4,3 +4,5 @@ from .models import *
 admin.site.register(Person)
 admin.site.register(Worker)
 admin.site.register(Customer)
+admin.site.register(Subscription)
+admin.site.register(SubscriptionRecommendation)

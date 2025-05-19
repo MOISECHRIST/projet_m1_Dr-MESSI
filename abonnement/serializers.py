@@ -1,0 +1,35 @@
+from rest_framework import serializers
+from .models import *
+
+class PersonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Person
+        fields = '__all__'
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Customer
+        fields = '__all__'
+
+class WorkerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Worker
+        fields = '__all__'
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Subscription
+        fields = '__all__'
+
+
+class SubscriptionRecommendationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SubscriptionRecommendation
+        fields = '__all__'

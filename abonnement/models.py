@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 # Create your models here.
 class Person(models.Model):
@@ -24,3 +25,15 @@ class Worker(Person):
     def save(self, *args, **kwargs):
         self.user_type = 'Worker'
         super().save(*args, **kwargs)
+
+
+class Subscription(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
+    subscribe_at = models.DateTimeField(default=timezone, null=False, blank=False)
+
+
+class SubscriptionRecommendation(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
+    recommendation_score = models.FloatField(default=0.0, null=False, blank=False)

@@ -7,7 +7,6 @@ from loguru import logger
 import sys
 
 
-
 # Create your views here.
 logger.remove()
 logger.add(f"logs_warning.log",

@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from .producer import RabbitMQ_User_Producer
 from  loguru import logger
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import MethodNotAllowed
 
 logger.remove()
 logger.add(f"logs_warning.log",
@@ -51,73 +52,20 @@ class PersonViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-        
+
     def create(self, request):
-        password = request.data.get("password")
-        username = request.data.get("username")
-        first_name = request.data.get("first_name")
-        last_name = request.data.get("last_name")
-        email = request.data.get("email")
-
-        user = User.objects.create(username = username, first_name=first_name, last_name=last_name,
-                                   email=email)
-        user.set_password(password)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        user.set_password(serializer.validated_data["password"])
         user.save()
-        data = {"id":user.pk,
-                "username":user.username,
-                "first_name":user.first_name,
-                "last_name":user.last_name,
-                "email": user.email,
-                "password":user.password}
-        return Response(data)
-    
-    def update(self, request, pk):
-        user = get_object_or_404(User, id=pk)
-        password = request.data.get("password")
-        username = request.data.get("username")
-        first_name = request.data.get("first_name")
-        last_name = request.data.get("last_name")
-        email = request.data.get("email")
+        return Response(self.get_serializer(user).data, status=status.HTTP_201_CREATED)
 
-        user.username = username
-        user.first_name=first_name
-        user.last_name=last_name
-        user.email=email
-        if user.check_password(password):
-            user.set_password(password)
-        user.save()
-        data = {"id":user.pk,
-                "username":user.username,
-                "first_name":user.first_name,
-                "last_name":user.last_name,
-                "email": user.email,
-                "password":user.password}
-        return Response(data)
-    
-    def partial_update(self, request, pk):
-        user = get_object_or_404(User, id=pk)
-        password = request.data.get("password")
-        username = request.data.get("username")
-        first_name = request.data.get("first_name")
-        last_name = request.data.get("last_name")
-        email = request.data.get("email")
+    def update(self, request, pk=None):
+        raise MethodNotAllowed("PUT", detail="Cette action n'est pas autorisée.")
 
-        user.username = username
-        user.first_name=first_name
-        user.last_name=last_name
-        user.email=email
-        if user.check_password(password):
-            user.set_password(password)
-        
-        user.save()
-        data = {"id":user.pk,
-                "username":user.username,
-                "first_name":user.first_name,
-                "last_name":user.last_name,
-                "email": user.email,
-                "password":user.password}
-        return Response(data)
-
+    def partial_update(self, request, pk=None):
+        raise MethodNotAllowed("PATCH", detail="Cette action n'est pas autorisée.")
 
     def destroy(self, request, pk):
         object = User.objects.get(id=pk)

@@ -15,8 +15,30 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers, permissions
+from messagerie.urls import router as messaging_router
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from decouple import config
 
+shema_view = get_schema_view(
+    openapi.Info(
+        title = "Messaging service API",
+        default_version = 'v1.0',
+        description = "This API allow users in our application to communicate through electronic messaging",
+        contact = openapi.Contact(email=config("AUTHOR_EMAIL"), name = config("AUTHOR_NAME"), url=config("AUTHOR_URL"))
+    ),
+    public = True,
+    permission_classes = (permissions.AllowAny,)
+)
+
+router = routers.DefaultRouter()
+router.registry.extend(messaging_router.registry)
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('messaging.service/', include(router.urls)),
+    path("swagger/", shema_view.with_ui('swagger', cache_timeout = 0), name='schema_swagger-ui'),
+    path("redoc/", shema_view.with_ui('redoc', cache_timeout = 0), name='schema_redoc'),
+    path("swagger.json", shema_view.without_ui(cache_timeout = 0), name='schema_json')
 ]

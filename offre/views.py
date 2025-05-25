@@ -5,7 +5,8 @@ from .serializers import *
 from rest_framework.response import Response
 from loguru import logger
 import sys
-
+from rest_framework.decorators import action
+from django.utils import timezone
 
 # Create your views here.
 logger.remove()
@@ -189,6 +190,13 @@ class WorkOfferViewSet(viewsets.ModelViewSet):
     serializer_class = WorkOfferSerializer
     #permission_classes = [IsAuthenticated]
 
+    @action(detail=False, methods=['get'], url_path='open.offers')
+    def get_open_offers(self, request):
+        WorkOffer.objects.filter(expire_date__lt=timezone.now(), offer_status="Open").update(offer_status = "Close")
+        offers = WorkOffer.objects.filter(offer_status="Open")
+        serializer = self.get_serializer(offers, many=True)
+        return Response(serializer.data)
+
     def create(self, request):
         serializer = WorkOfferSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -208,6 +216,7 @@ class WorkOfferViewSet(viewsets.ModelViewSet):
 
     def update(self, request, pk):
         object = WorkOffer.objects.get(id=pk)
+        object.check_and_update_status()
         serializer = WorkOfferSerializer(instance=object, data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -226,6 +235,7 @@ class WorkOfferViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, pk):
         object = WorkOffer.objects.get(id=pk)
+        object.check_and_update_status()
         serializer = WorkOfferSerializer(instance=object, data=request.data)
         serializer.is_valid(raise_exception=True)
 

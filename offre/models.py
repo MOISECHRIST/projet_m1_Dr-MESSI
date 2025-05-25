@@ -6,12 +6,9 @@ from django.core.exceptions import ValidationError
 # Create your models here.
 class Media(models.Model):
     file = models.FileField(upload_to = "media/offer/", null=False, blank=False)
-    upload_at = models.DateTimeField(null=False, blank=False)
+    upload_at = models.DateTimeField(null=False, blank=False, auto_now=True)
 
     def save(self, *args, **kwargs):
-        current_date = timezone.now()
-        self.upload_at = current_date
-
         super().save(*args, **kwargs)
 
 class Person(models.Model):
@@ -57,6 +54,19 @@ class WorkOffer(models.Model):
     list_of_media = models.ManyToManyField(Media, blank=True)
     number_of_worker = models.IntegerField(null=True, blank=True)
     work_domain = models.CharField(max_length=255, null=False, blank=False, default='unknown')
+
+    def check_and_update_status(self):
+        if self.expire_date is not None:
+            today = timezone.now()
+            if self.offer_status!="Close" and self.expire_date<today:
+                self.offer_status = "Close"
+                self.save()
+
+    def save(self, *args, **kwargs):
+        if self.offer_status > self.expire_date:
+            raise ValidationError("La date d'expiration doit être au moins égale à la date du jour")
+
+        super().save(*args, **kwargs)
 
 class OfferApplication(models.Model):
     STATUS = [("Pending", "Pending"),

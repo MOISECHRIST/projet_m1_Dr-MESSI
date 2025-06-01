@@ -2,7 +2,7 @@ import pika
 import json
 import threading
 from decouple import config
-from .models import Worker, Customer, Person
+from .models import Worker, Customer, Person, Service
 from loguru import logger
 import sys
 from django.shortcuts import get_object_or_404
@@ -64,6 +64,17 @@ def handle_person_event(routing_key, data):
         object.save()
         logger.success(f"Success consuming in {routing_key}")
 
+def handle_service_event(routing_key, data):
+    if "create" in routing_key:
+        object = Service.objects.create(service_id=data["id"],
+                                        service_name = data['service_name'])
+        object.save()
+        logger.success(f"Success consuming in {routing_key}")
+    elif "delete" in routing_key:
+        object = get_object_or_404(Person,service_id=data['id'])
+        object.delete()
+        logger.success(f"Success consuming in {routing_key}")
+
 def start_consumer():
     credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD)
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST, port=int(RABBITMQ_PORT), credentials=credentials))
@@ -109,3 +120,5 @@ def callback(ch, method, properties, body):
         handle_customer_event(action, data)
     elif classe == "user":
         handle_person_event(action, data)
+    elif classe == "servicesprovided":
+        handle_service_event(action, data)

@@ -40,6 +40,10 @@ class Location(models.Model):
     city = models.CharField(null=False, blank=False, max_length=100)
     locality = models.CharField(null=False, blank=False, max_length=255)
 
+class Service(models.Model):
+    service_id = models.IntegerField(primary_key=True, unique=True)
+    service_name = models.CharField(blank=False, null=False, max_length=250)
+
 class WorkOffer(models.Model):
     STATUS = [("Open", "Open"),
               ("Close", "Close")]
@@ -53,7 +57,7 @@ class WorkOffer(models.Model):
     expire_date = models.DateField(null=True, blank=True)
     list_of_media = models.ManyToManyField(Media, blank=True)
     number_of_worker = models.IntegerField(null=True, blank=True)
-    work_domain = models.CharField(max_length=255, null=False, blank=False, default='unknown')
+    service = models.ManyToManyField(Service, blank=False)
 
     def check_and_update_status(self):
         if self.expire_date is not None:
@@ -66,11 +70,11 @@ class WorkOffer(models.Model):
         if self.offer_status > self.expire_date:
             raise ValidationError("La date d'expiration doit être au moins égale à la date du jour")
 
-        super().save(*args, **kwargs)
+
 
 class OfferApplication(models.Model):
     STATUS = [("Pending", "Pending"),
-              ("Complete", "Complete"),
+              ("Rejected", "Rejected"),
               ("Validated", "Validated")]
     worker_applicant = models.ForeignKey(Worker, on_delete=models.CASCADE)
     offer = models.ForeignKey(WorkOffer, on_delete=models.CASCADE)
@@ -87,9 +91,7 @@ class OfferApplication(models.Model):
             ).exclude(pk=self.pk).count()
 
             # Comparaison avec le nombre maximum de travailleurs
-            if self.offer.number_of_worker is not None and validated_count >= self.offer.number_of_worker:
-                raise ValidationError("Le nombre maximum de travailleurs pour cette offre a déjà été atteint.")
-            elif self.offer.number_of_worker is not None and validated_count == self.offer.number_of_worker -1 :
+            if self.offer.number_of_worker is not None and validated_count == self.offer.number_of_worker -1 :
                 self.offer.offer_status = "Close"
 
             if self.offer.offer_status == "Close":

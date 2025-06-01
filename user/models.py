@@ -89,7 +89,8 @@ class Experience(models.Model):
     employer_phone = models.CharField(blank=False, null=False, max_length=255)
     employer_email = models.EmailField(max_length=255)
     start_date = models.DateField(null=False, blank=False)
-    end_date = models.DateField(null=False, blank=False)
+    end_date = models.DateField(null=True, blank=True)
+    service = models.ForeignKey(ServicesProvided, on_delete=models.CASCADE)
     experience_description = models.TextField(blank=True, null=True)
 
 #Worker
@@ -100,13 +101,40 @@ class Experience(models.Model):
     #services -> list(ServicesProvided)
     #experiences -> List(Experience)
 class Worker(Person):
-    STATUS = [("Unverified", "Unverified"),
-              ("Beginner", "Beginner"),
-              ("Intermediate", "Intermediate"),
-              ("Confirmed", "Confirmed")]
     headline = models.TextField(null=False, blank=True)
     about_worker = models.TextField(blank=True, null=True)
     cover_image = models.ImageField(upload_to="media/cover_image/", null=True, blank=True)
     services = models.ManyToManyField(ServicesProvided, blank=True, null=True)
     experiences = models.ManyToManyField(Experience, blank=True, null=True)
-    worker_status = models.CharField(choices = STATUS, default="Unverified", max_length = 20)
+
+
+#Retirer le status dans worker
+#Creer une table evaluation des experience (worker, service et note evaluation)
+#Faire un systeme de QCM genere par l'IA pour évaluer les aptitudes des workers (50 questions par service)
+#Pour une évaluation on choisi aléatoirement 5
+#Ajouter un compte a rebour de 30s par question
+
+class MultipleQuestionAnswer(models.Model):
+    question = models.TextField(blank = False, null=False)
+    answer1 = models.TextField(blank = False, null=False)
+    answer2 = models.TextField(blank = False, null=False)
+    answer3 = models.TextField(blank = False, null=False)
+    answer4 = models.TextField(blank = False, null=False)
+    answer5 = models.TextField(blank = False, null=False)
+    true_answer_id = models.IntegerField(blank=False, null=False)
+
+
+class QuestionsForService(models.Model):
+    service = models.ForeignKey(ServicesProvided, on_delete= models.CASCADE)
+    questions_answers = models.ManyToManyField(MultipleQuestionAnswer, blank = False)
+
+class Evaluation(models.Model):
+    STATUS = [("Unverified", "Unverified"),
+              ("Beginner", "Beginner"),
+              ("Intermediate", "Intermediate"),
+              ("Confirmed", "Confirmed")]
+    worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
+    questions = models.ForeignKey(QuestionsForService, on_delete=models.CASCADE)
+    final_marks = models.FloatField(default=0.0)
+    evaluation_status = models.CharField(choices=STATUS, max_length=20, blank=False, default= "Unverified")
+    evaluate_at = models.DateTimeField(auto_now_add=True)

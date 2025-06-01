@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from .models import *
 from .producer import Producer
@@ -5,7 +6,7 @@ from .serializers import *
 from rest_framework.response import Response
 from loguru import logger
 import sys
-
+from rest_framework.decorators import action
 
 
 # Create your views here.
@@ -72,6 +73,29 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
             producer.close()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=True,
+        methods=['post'],
+        url_path='subscription-unfollow',
+        serializer_class=EmptySerializer
+    )
+    def unfollow_worker(self, request, pk):
+        subscription= get_object_or_404(Subscription, id=pk)
+        subscription.subscribe_status="Unfollow"
+        subscription.save()
+        serializer = self.get_serializer(subscription, many=False)
+
+        action_rabbit = "subscription.workerunfollow_recommendation"
+        producer = Producer()
+        try:
+            producer.publish(message=serializer.data, routing_key=routing_key + action_rabbit)
+            logger.success(f"Success publishing in {routing_key + action_rabbit}")
+        except Exception as e:
+            logger.error(f"Error publishing in {routing_key + action_rabbit} : {e}")
+        finally:
+            producer.close()
+        return Response(serializer.data)
 
 
 class SubscriptionRecommendationViewSet(viewsets.ModelViewSet):

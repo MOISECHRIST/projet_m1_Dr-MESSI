@@ -28,9 +28,13 @@ class Worker(Person):
 
 
 class Subscription(models.Model):
+    SUBSCRIPTION_STATUS = [("Follow", "Follow"),
+                           ("Unfollow", "Unfollow")]
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
     subscribe_at = models.DateTimeField(default=timezone.now(), null=False, blank=False)
+    subscribe_status = models.CharField(max_length=20, choices=SUBSCRIPTION_STATUS, default="Follow")
+    #Ajouter un status d'abonnement
 
 
 class SubscriptionRecommendation(models.Model):

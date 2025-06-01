@@ -28,6 +28,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class EmptySerializer(serializers.Serializer):
+    pass
+
 class SubscriptionRecommendationSerializer(serializers.ModelSerializer):
 
     class Meta:

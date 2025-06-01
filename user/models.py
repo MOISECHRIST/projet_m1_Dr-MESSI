@@ -122,19 +122,21 @@ class MultipleQuestionAnswer(models.Model):
     answer4 = models.TextField(blank = False, null=False)
     answer5 = models.TextField(blank = False, null=False)
     true_answer_id = models.IntegerField(blank=False, null=False)
-
-
-class QuestionsForService(models.Model):
-    service = models.ForeignKey(ServicesProvided, on_delete= models.CASCADE)
-    questions_answers = models.ManyToManyField(MultipleQuestionAnswer, blank = False)
+    service = models.ForeignKey(ServicesProvided, on_delete=models.CASCADE)
 
 class Evaluation(models.Model):
-    STATUS = [("Unverified", "Unverified"),
+    STATUS = [("Unevaluated", "Unevaluated"),
               ("Beginner", "Beginner"),
               ("Intermediate", "Intermediate"),
               ("Confirmed", "Confirmed")]
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
-    questions = models.ForeignKey(QuestionsForService, on_delete=models.CASCADE)
-    final_marks = models.FloatField(default=0.0)
-    evaluation_status = models.CharField(choices=STATUS, max_length=20, blank=False, default= "Unverified")
+    service = models.ForeignKey(ServicesProvided, on_delete=models.CASCADE)
+    final_marks = models.IntegerField(default=0)
+    evaluation_status = models.CharField(choices=STATUS, max_length=20, blank=False, default= "Unevaluated")
     evaluate_at = models.DateTimeField(auto_now_add=True)
+
+
+class EvaluationAnswer(models.Model):
+    evaluation = models.ForeignKey(Evaluation, on_delete=models.CASCADE, related_name='worker_answers')
+    question = models.ForeignKey(MultipleQuestionAnswer, on_delete=models.CASCADE)
+    worker_answer_selection = models.IntegerField(blank=False, null=False)

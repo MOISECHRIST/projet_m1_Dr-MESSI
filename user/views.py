@@ -9,6 +9,8 @@ from .producer import RabbitMQ_User_Producer
 from  loguru import logger
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.decorators import action
+import random
 
 logger.remove()
 logger.add(f"logs_warning.log",
@@ -21,28 +23,6 @@ routing_key = "user."
 list_services = ["publication", "abonnement", "offre", "recommendation", "messagerie"]
 list_queue = ["user_publication_queue", "user_abonnement_queue", "user_offre_queue", "user_recommendation_queue", "user_messagerie_queue"]
 list_exchange = ["user_publication_events", "user_abonnement_events", "user_offre_events", "user_recommendation_events", "user_messagerie_events"]
-
-class MeViewSet(viewsets.ViewSet):
-
-    def list(self, request):
-        if not request.user.is_authenticated:
-            return Response({"error": "Utilisateur non authentifié"}, status=401)
-
-        try:
-            user = user = get_object_or_404(User, id=request.user.pk)
-            user_data = UserSerializer(user).data
-            return Response(user_data)
-        except User.DoesNotExist:
-            return Response({"error": "Utilisateur introuvable"}, status=404)
-
-    def retrieve(self, request, pk):
-        user = User.objects.get(id=pk)
-
-        if user != request.user:
-            return Response({"message": "User not connected"}, status=403)
-
-        data = UserSerializer(user).data
-        return Response({"message": "User connected"}, status=200)
 
 class PersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.all()
@@ -109,36 +89,45 @@ class ServicesProvidedViewSet(viewsets.ModelViewSet):
         serializer = ServicesProvidedSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        action = "servicesprovided.create_recommendation"
-        queue = "user_recommendation_queue"
-        exchange = "user_recommendation_events"
-        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
+        action = "servicesprovided.create"
+        list_queue2 = ["user_offre_queue", "user_recommendation_queue"]
+        list_services2 = [ "offre", "recommendation"]
+        list_exchange2 = ["user_offre_events", "user_recommendation_events"]
+        producer = [RabbitMQ_User_Producer(queue=queue, exchange=exchange) for queue, exchange in
+                    zip(list_queue2, list_exchange2)]
+
         try:
             serializer.save()
-            producer.publish(message=serializer.data, routing_key=routing_key+action)
-            logger.success(f"Success publishing in {routing_key+action }")
+            for i, service in enumerate(list_services2):
+                producer[i].publish(message=serializer.data, routing_key=routing_key + action + "_" + service)
+                logger.success(f"Success publishing in {routing_key + action + '_' + service}")
         except Exception as e :
             logger.error(f"Error publishing in {routing_key+action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(serializer.data)
 
     def destroy(self, request, pk):
         object = ServicesProvided.objects.get(id=pk)
 
-        action = "servicesprovided.delete_recommendation"
-        queue = "user_recommendation_queue"
-        exchange = "user_recommendation_events"
-        producer = RabbitMQ_User_Producer(queue=queue, exchange=exchange)
+        action = "servicesprovided.delete"
+        list_queue2 = ["user_offre_queue", "user_recommendation_queue"]
+        list_services2 = ["offre", "recommendation"]
+        list_exchange2 = ["user_offre_events", "user_recommendation_events"]
+        producer = [RabbitMQ_User_Producer(queue=queue, exchange=exchange) for queue, exchange in
+                    zip(list_queue2, list_exchange2)]
         try:
             object.delete()
-            producer.publish(message=pk, routing_key=routing_key + action)
-            logger.success(f"Success publishing in {routing_key + action}")
+            for i, service in enumerate(list_services2):
+                producer[i].publish(message=pk, routing_key=routing_key + action + "_" + service)
+                logger.success(f"Success publishing in {routing_key + action + '_' + service}")
         except Exception as e:
             logger.error(f"Error publishing in {routing_key + action} : {e}")
         finally:
-            producer.close()
+            for p in producer:
+                p.close()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -319,3 +308,38 @@ class WorkerViewSet(viewsets.ModelViewSet):
             producer.close()
 
         return Response(serializer.data)
+
+
+class MultipleQuestionAnswerViewSet(viewsets.ModelViewSet):
+    queryset = MultipleQuestionAnswer.objects.all()
+    serializer_class = MultipleQuestionAnswerSerializer
+    #permission_classes = [IsAuthenticated]
+
+    @action(
+        detail=True,
+        methods=['post'],
+        url_path='choice-questions',
+        serializer_class=EmptySerializer
+    )
+    def random_choice_question(self, request, service_id=None):
+        try:
+            service = ServicesProvided.objects.get(id=service_id)
+        except ServicesProvided.DoesNotExist:
+            return Response({"error": "Service not found"}, status=404)
+
+        all_service_questions = list(MultipleQuestionAnswer.objects.filter(service=service))
+        selected_questions = random.sample(all_service_questions, 5)
+        serializer = MultipleQuestionAnswerSerializer(selected_questions, many=True)
+        return Response(serializer.data)
+
+
+
+class EvaluationViewSet(viewsets.ModelViewSet):
+    queryset = Evaluation.objects.all()
+    serializer_class = EvaluationSerializer
+    #permission_classes = [IsAuthenticated]
+
+class EvaluationAnswerViewSet(viewsets.ModelViewSet):
+    queryset = EvaluationAnswer.objects.all()
+    serializer_class = EvaluationAnswerSerializer
+    #permission_classes = [IsAuthenticated]

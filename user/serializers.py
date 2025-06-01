@@ -49,3 +49,25 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True}  
         }
+
+class MultipleQuestionAnswerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MultipleQuestionAnswer
+        fields = '__all__'
+
+
+class EvaluationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Evaluation
+        fields = '__all__'
+
+class EmptySerializer(serializers.Serializer):
+    pass
+
+class EvaluationAnswerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = EvaluationAnswer
+        fields = '__all__'

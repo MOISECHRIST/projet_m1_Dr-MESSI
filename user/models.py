@@ -30,33 +30,33 @@ class Person(models.Model):
     country = models.CharField(blank=True, null = True, max_length=150)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    def save(self, *args, **kwargs):
+    #def save(self, *args, **kwargs):
         # Si l'objet est nouveau, on récupère l'IP et la localisation
-        try:
-            ip_address = get_ipaddress()
-            location_data = get_location(ip_address)
-            self.city = location_data["city"]
-            self.country = location_data["country"]
-            try :
-                self.longitude = float(location_data["long"])
+     #   try:
+      #      ip_address = get_ipaddress()
+      #      location_data = get_location(ip_address)
+      #      self.city = location_data["city"]
+      #      self.country = location_data["country"]
+      #      try :
+      #          self.longitude = float(location_data["long"])
 
-            except Exception as e:
-                print(f"error : Ajout des donnees de la longitude ({location_data['long']}) échoué \n{e}")
-                self.longitude = 0.0
+       #     except Exception as e:
+       #         print(f"error : Ajout des donnees de la longitude ({location_data['long']}) échoué \n{e}")
+       #         self.longitude = 0.0
 
-            try :
-                self.latitude = float(location_data["lat"])
+       #     try :
+       #         self.latitude = float(location_data["lat"])
 
-            except Exception as e:
-                print(f"error : Ajout des donnees de la latitude {location_data['lat']} échoué \n{e}")
-                self.latitude = 0.0
-        except Exception as e:
-            self.city=""
-            self.country=""
-            self.longitude = 0.0
-            self.latitude = 0.0
+#            except Exception as e:
+#                print(f"error : Ajout des donnees de la latitude {location_data['lat']} échoué \n{e}")
+#                self.latitude = 0.0
+#        except Exception as e:
+#            self.city=""
+#            self.country=""
+#            self.longitude = 0.0
+#            self.latitude = 0.0
 
-        super().save(*args, **kwargs)
+#        super().save(*args, **kwargs)
 
 #ServicesProvided
     #service_name = str
